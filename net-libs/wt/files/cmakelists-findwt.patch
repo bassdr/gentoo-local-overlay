@@ -1,0 +1,20 @@
+--- CMakeLists.txt	2015-03-03 07:24:58.000000000 -0500
++++ CMakeLists-new	2015-09-19 00:53:59.021881765 -0400
+@@ -94,7 +94,7 @@
+ OPTION(BUILD_EXAMPLES "Build examples" ON)
+ OPTION(INSTALL_EXAMPLES "Install examples (binaries and source)" OFF)
+ OPTION(INSTALL_RESOURCES "Install resources directory" ON)
+-OPTION(INSTALL_FINDWT_CMAKE_FILE "Install FindWt.cmake in systemwide cmake dir (in addition to CMAKE_INSTALL_PREFIX/cmake)" OFF)
++OPTION(INSTALL_FINDWT_CMAKE_FILE "Install FindWt.cmake in systemwide cmake dir" OFF)
+ OPTION(ENABLE_SSL "Enable cryptography functions, using OpenSSL" ON)
+ OPTION(ENABLE_HARU "Enable Haru Free PDF Library, which is used to provide support for painting to PDF (WPdfImage)" ON)
+ OPTION(ENABLE_PANGO "Enable Pango Library, which is used for improved font support (WPdfImage and WRasterImage)" ON)
+@@ -543,8 +543,6 @@
+   INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/FindWt.cmake DESTINATION
+     ${WT_CMAKE_FINDER_INSTALL_DIR} )
+ ENDIF (INSTALL_FINDWT_CMAKE_FILE)
+-INSTALL(FILES ${PROJECT_SOURCE_DIR}/cmake/FindWt.cmake DESTINATION
+-    ${CMAKE_INSTALL_PREFIX}/cmake )
+ 
+ IF(INSTALL_RESOURCES)
+ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/resources DESTINATION
