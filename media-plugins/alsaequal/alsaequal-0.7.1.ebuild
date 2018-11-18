@@ -8,7 +8,7 @@ DESCRIPTION="A real-time adjustable equalizer plugin for ALSA"
 HOMEPAGE="https://github.com/bassdr/alsaequal"
 SRC_URI="https://github.com/bassdr/${PN}/archive/v${PV/_/-}.tar.gz -> ${P}.tar.gz"
 
-LICENSE="LGPL-2.1"
+LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
 IUSE=""
@@ -20,7 +20,7 @@ RDEPEND=">=media-libs/alsa-lib-1.0.27.2[${MULTILIB_USEDEP}]
 DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/${PN}
-DOCS=( README )
+DOCS=( README.md )
 
 src_unpack() {
 	unpack ${A}
