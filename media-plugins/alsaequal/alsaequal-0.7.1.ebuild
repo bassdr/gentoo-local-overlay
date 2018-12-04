@@ -1,8 +1,8 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
-EAPI=5
-inherit eutils multilib toolchain-funcs multilib-minimal
+EAPI=7
+inherit toolchain-funcs multilib-minimal
 
 DESCRIPTION="A real-time adjustable equalizer plugin for ALSA"
 HOMEPAGE="https://github.com/bassdr/alsaequal"
@@ -19,16 +19,11 @@ RDEPEND=">=media-libs/alsa-lib-1.0.27.2[${MULTILIB_USEDEP}]
 					!app-emulation/emul-linux-x86-soundlibs[-abi_x86_32(-)] )"
 DEPEND="${RDEPEND}"
 
-S=${WORKDIR}/${PN}
-DOCS=( README.md )
-
-src_unpack() {
-	unpack ${A}
-	S="$(pwd)/${PN}-${PV/_/-}"
-}
+S="${WORKDIR}/${PN}-${PV/_/-}"
 
 src_prepare() {
 	multilib_copy_sources
+        default
 }
 
 multilib_src_compile() {
