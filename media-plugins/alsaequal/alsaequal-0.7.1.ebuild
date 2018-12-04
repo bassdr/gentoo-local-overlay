@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=7
-inherit toolchain-funcs multilib-minimal
+inherit multilib-minimal
 
 DESCRIPTION="A real-time adjustable equalizer plugin for ALSA"
 HOMEPAGE="https://github.com/bassdr/alsaequal"
