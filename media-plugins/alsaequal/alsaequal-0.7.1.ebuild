@@ -19,22 +19,22 @@ RDEPEND=">=media-libs/alsa-lib-1.0.27.2[${MULTILIB_USEDEP}]
 DEPEND="${RDEPEND}"
 
 src_prepare() {
-  multilib_copy_sources
-  default
+	multilib_copy_sources
+        default
 }
 
 multilib_src_compile() {
-  emake \
-    CC="$(tc-getCC)" \
-    CFLAGS="${CFLAGS} -Wall -fPIC -DPIC" \
-    LD="$(tc-getCC)" \
-    LDFLAGS="${LDFLAGS} -shared" \
-    Q= \
-    SND_PCM_LIBS="-lasound" \
-    SND_CTL_LIBS="-lasound" || die
+	emake \
+		CC="$(tc-getCC)" \
+		CFLAGS="${CFLAGS} -Wall -fPIC -DPIC" \
+		LD="$(tc-getCC)" \
+		LDFLAGS="${LDFLAGS} -shared" \
+		Q= \
+		SND_PCM_LIBS="-lasound" \
+		SND_CTL_LIBS="-lasound" || die
 }
 
 multilib_src_install() {
-  into /usr/$(get_libdir)/alsa-lib
-  dolib.so *.so
+	into /usr/$(get_libdir)/alsa-lib
+	dolib.so *.so
 }
