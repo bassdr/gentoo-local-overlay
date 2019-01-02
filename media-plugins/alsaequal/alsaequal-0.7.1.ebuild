@@ -19,8 +19,8 @@ RDEPEND=">=media-libs/alsa-lib-1.0.27.2[${MULTILIB_USEDEP}]
 DEPEND="${RDEPEND}"
 
 src_prepare() {
-	multilib_copy_sources
         default
+	multilib_copy_sources
 }
 
 multilib_src_compile() {
