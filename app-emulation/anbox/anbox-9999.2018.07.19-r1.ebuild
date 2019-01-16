@@ -16,7 +16,7 @@ SRC_URI="http://build.anbox.io/android-images/${IMG_PATH}/android_amd64.img -> a
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="test privileged systemd elogind"
+IUSE="test systemd elogind"
 REQUIRED_USE="^^ ( systemd elogind )"
 RESTRICT="mirror"
 
@@ -105,9 +105,6 @@ src_install() {
 	# 'anbox-container-manager.service' is started as root #
 	insinto $(systemd_get_systemunitdir)
 	doins "${FILESDIR}/anbox-container-manager.service"
-	use privileged && \
-		sed -e 's:--daemon --data-path:--daemon --privileged --data-path:g' \
-			-i $(systemd_get_systemunitdir)/anbox-container-manager.service
 	dosym $(systemd_get_systemunitdir)/anbox-container-manager.service \
 		$(systemd_get_systemunitdir)/default.target.wants/anbox-container-manager.service
 
@@ -121,6 +118,9 @@ src_install() {
 	# 'anbox-launch' wrapper script to start 'session-manager' and anbox appmgr #
 	exeinto /usr/bin
 	doexe "${FILESDIR}/anbox-launch"
+
+	# init.d script
+	newinitd "${FILESDIR}/anbox-container-manager.initd" anbox-container-manager
 
 	# anbox.desktop and icon #
 	insinto /usr/share/applications
