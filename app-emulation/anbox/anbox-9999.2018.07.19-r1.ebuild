@@ -95,7 +95,12 @@ src_prepare() {
 		sed -i '/include(CTest)/d' CMakeLists.txt
 		sed -i '/find_package(GMock)/d' CMakeLists.txt
 		sed -i '/add_subdirectory(tests)/d' CMakeLists.txt
+
 		sed -i '/_unittest.cpp/d' external/android-emugl/shared/emugl/common/CMakeLists.txt
+
+		mv external/xdg/CMakeLists.txt external/xdg/CMakeLists.txt.old
+		sed -n '/enable_testing()/,$!p' external/xdg/CMakeLists.txt.old > external/xdg/CMakeLists.txt
+		sed -i 's/ unit_test_framework//g' external/xdg/CMakeLists.txt
 	fi
 }
 
@@ -121,6 +126,7 @@ src_install() {
 
 	# init.d script
 	newinitd "${FILESDIR}/anbox-container-manager.initd" anbox-container-manager
+	newconfd "${FILESDIR}/anbox-container-manager.confd" anbox-container-manager
 
 	# anbox.desktop and icon #
 	insinto /usr/share/applications
