@@ -16,7 +16,7 @@ SRC_URI="http://build.anbox.io/android-images/${IMG_PATH}/android_amd64.img -> a
 LICENSE="GPL-3"
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE="test systemd elogind"
+IUSE="test systemd elogind wayland"
 REQUIRED_USE="^^ ( systemd elogind )"
 RESTRICT="mirror"
 
@@ -46,21 +46,20 @@ RESTRICT="mirror"
 RDEPEND="dev-util/android-tools
 	net-firewall/iptables"
 DEPEND="${RDEPEND}
-	app-emulation/lxc[cgmanager]
-	dev-libs/boost:=[threads]
-	dev-libs/glib:2
-	dev-libs/properties-cpp
-	dev-libs/protobuf
-	media-libs/glm
-	media-libs/libsdl2[wayland]
-	media-libs/mesa[egl,gles2]
-	media-libs/sdl2-image
 	sys-apps/dbus
+	test? ( dev-cpp/gmock
+		dev-cpp/gtest )
+	dev-libs/boost:=[threads]
 	sys-libs/libcap
 	systemd? ( sys-apps/systemd[nat] )
 	elogind? ( sys-auth/elogind )
-	test? ( dev-cpp/gmock
-		dev-cpp/gtest )"
+	media-libs/mesa[egl,gles2]
+	media-libs/libsdl2[wayland=]
+	media-libs/sdl2-image
+	dev-libs/protobuf
+	>=app-emulation/lxc-3.0
+	dev-libs/properties-cpp
+	dev-libs/glib:2"
 
 CONFIG_CHECK="
 	~ANDROID_BINDER_IPC
@@ -102,6 +101,14 @@ src_prepare() {
 		sed -n '/enable_testing()/,$!p' external/xdg/CMakeLists.txt.old > external/xdg/CMakeLists.txt
 		sed -i 's/ unit_test_framework//g' external/xdg/CMakeLists.txt
 	fi
+}
+
+src_compile() {
+	local mycmakeargs=(
+		-DENABLE_WAYLAND="$(usex wayland)"
+	)
+
+	cmake-utils_src_configure
 }
 
 src_install() {
