@@ -141,17 +141,15 @@ src_install() {
 }
 
 pkg_postinst() {
-	if ! use privileged; then
-		if [ ! -e /etc/subuid ] || [ ! -e /etc/subuid ]; then
-			elog "Oops...no /etc/subuid or /etc/subgid files have been detected on the system"
-			elog "LXC unprivileged container support requires correct setup of /etc/subuid and /etc/subgid files so that it can use"
-			elog " sys-apps/shadow's 'newuidmap' and 'newgidmap' to map UIDs/GIDs from the host to the container"
-			elog " See here -> https://stgraber.org/2014/01/17/lxc-1-0-unprivileged-containers/"
-			elog "TLDR? Here is a working example of /etc/subgid and /etc/subuid files (both have the same content):"
-			elog "	root:100000:65536"
-			elog "	root:1000:2"
-			elog "	<username>:100000:65536"
-			elog "	<username>:1000:2"
-		fi
+	if [ ! -e /etc/subuid ] || [ ! -e /etc/subgid ] ; then
+		elog "Oops...no /etc/subuid or /etc/subgid files have been detected on the system"
+		elog "LXC unprivileged container support requires correct setup of /etc/subuid and /etc/subgid files so that it can use"
+		elog " sys-apps/shadow's 'newuidmap' and 'newgidmap' to map UIDs/GIDs from the host to the container"
+		elog " See here -> https://stgraber.org/2014/01/17/lxc-1-0-unprivileged-containers/"
+		elog "TLDR? Here is a working example of /etc/subgid and /etc/subuid files (both have the same content):"
+		elog "	root:100000:65536"
+		elog "	root:1000:2"
+		elog "	<username>:100000:65536"
+		elog "	<username>:1000:2"
 	fi
 }
