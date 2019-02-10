@@ -1,0 +1,23 @@
+diff -ur RetroArch-1.7.6/qb/config.libs.sh RetroArch-1.7.6-patch/qb/config.libs.sh
+--- RetroArch-1.7.6/qb/config.libs.sh	2019-02-09 21:27:37.267267512 -0500
++++ RetroArch-1.7.6-patch/qb/config.libs.sh	2019-02-09 21:57:40.078362478 -0500
+@@ -84,10 +84,17 @@
+ fi
+ 
+ if [ "$HAVE_NEON" = "yes" ]; then
+-   add_define MAKEFILE NEON_CFLAGS '-mfpu=neon -marm'
+-   add_define MAKEFILE NEON_ASFLAGS -mfpu=neon
++   local cust_fpu="$(echo ${CFLAGS} | egrep -o '\-mfpu\=\w+')"
++   if [ "x$cust_fpu" != "x" ]; then
++      add_define MAKEFILE NEON_CFLAGS  "$cust_fpu -marm"
++      add_define MAKEFILE NEON_ASFLAGS "$cust_fpu"
++   else
++      add_define MAKEFILE NEON_CFLAGS  "-mfpu=neon -marm"
++      add_define MAKEFILE NEON_ASFLAGS "-mfpu=neon"
++   fi
+ fi
+ 
++
+ if [ "$HAVE_FLOATHARD" = "yes" ]; then
+    add_define MAKEFILE FLOATHARD_CFLAGS -mfloat-abi=hard
+ fi
