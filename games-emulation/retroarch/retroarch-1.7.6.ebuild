@@ -66,7 +66,7 @@ RDEPEND="
 	alsa? ( media-libs/alsa-lib:0= )
 	assets? ( games-emulation/retroarch-assets:0= )
 	cg? ( media-gfx/nvidia-cg-toolkit:0= )
-	cores? ( games-emulation/libretro-super:0= )
+	cores? ( games-emulation/libretro-cores:0= )
 	database? ( games-emulation/libretro-database:0= )
 	arm? ( dispmanx? ( || ( media-libs/raspberrypi-userland:0 media-libs/raspberrypi-userland-bin:0 ) ) )
 	ffmpeg? ( >=media-video/ffmpeg-2.1.3:0= )

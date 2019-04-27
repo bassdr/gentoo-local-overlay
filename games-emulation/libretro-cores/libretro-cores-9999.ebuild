@@ -159,15 +159,21 @@ BDEPEND=""
 
 src_unpack() {
   git-r3_src_unpack
-  ${P}/libretro-fetch.sh --shallow --cores
+  "${S}/libretro-fetch.sh" --shallow --cores || die
+}
+
+src_prepare() {
+  default
+  sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
+  sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
+  sed -i 's/RARCH_DIST_DIR=.*$//g' "${S}/libretro-install.sh"
 }
 
 multilib_src_compile() {
   cd ..
-  CC="$(tc-getCC)" CXX="$(tc-getCXX)" CXX11="$(tc-getCXX)" ${P}/libretro-build.sh
+  RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh" || die
 }
 
 multilib_src_install() {
-  cd ..
-  ${P}/libretro-install.sh "${D}/usr/$(get_libdir)/libretro"
+  RARCH_DIST_DIR="${BUILD_DIR}" "${S}/libretro-install.sh" "${D}/usr/$(get_libdir)/libretro" || die
 }
