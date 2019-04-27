@@ -171,7 +171,7 @@ src_prepare() {
 
 multilib_src_compile() {
   cd ..
-  RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh" || die
+  RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh"
 }
 
 multilib_src_install() {
