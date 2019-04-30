@@ -35,6 +35,6 @@ multilib_src_compile() {
 }
 
 multilib_src_install() {
-	insinto /usr/$(get_libdir)/alsa-lib
-	doins *.so
+	exeinto /usr/$(get_libdir)/alsa-lib
+	doexe *.so
 }
