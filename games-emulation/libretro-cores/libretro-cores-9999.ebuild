@@ -151,7 +151,7 @@ inherit git-r3 toolchain-funcs multilib-minimal
 LICENSE=""
 SLOT="0"
 KEYWORDS="~amd64 ~x86"
-IUSE=""
+IUSE="opengl vulkan"
 
 DEPEND=">=net-libs/libpcap-1.8.1-r2"
 RDEPEND="${DEPEND}"
@@ -167,13 +167,36 @@ src_prepare() {
   sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/RARCH_DIST_DIR=.*$//g' "${S}/libretro-install.sh"
+  sed -i '/export BUILD_LIBRETRO_GL=1/d' "${S}/libretro-config.sh"
+
+  if use opengl ; then
+    echo "export BUILD_LIBRETRO_GL=1" >> "${S}/libretro-config.sh"
+    echo "export HAVE_OPENGL=1" >> "${S}/libretro-config.sh"
+    echo "export HAVE_HW=1" >> "${S}/libretro-config.sh"
+  fi
+
+  if use vulkan ; then
+    echo "export HAVE_VULKAN=1" >> "${S}/libretro-config.sh"
+    echo "export HAVE_HW=1" >> "${S}/libretro-config.sh"
+  fi
+
 }
 
 multilib_src_compile() {
   cd ..
+
   RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh"
+
+  if use vulkan ; then
+    LDFLAGS="$LDFLAGS -lpthread" HAVE_PARALLEL=1 HAVE_OPENGL=0 \
+    RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh" parallel_n64
+  fi
 }
 
 multilib_src_install() {
-  RARCH_DIST_DIR="${BUILD_DIR}" "${S}/libretro-install.sh" "${D}/usr/$(get_libdir)/libretro" || die
+  exeinto "${D}/usr/$(get_libdir)/libretro"
+  doexe "${BUILD_DIR}/*.so"
+
+  insinto "${D}/usr/share/libretro/"
+  doins -r dist/info/
 }
