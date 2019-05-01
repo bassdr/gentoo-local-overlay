@@ -157,6 +157,8 @@ DEPEND=">=net-libs/libpcap-1.8.1-r2"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 
+PATCHES=( "${FILEDIR}/mednafen_psx_hw.patch" )
+
 src_unpack() {
   git-r3_src_unpack
   "${S}/libretro-fetch.sh" --shallow --cores || die
@@ -167,22 +169,11 @@ src_prepare() {
 
   sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
-  sed -i '/export BUILD_LIBRETRO_GL=1/d' "${S}/libretro-config.sh"
 }
 
 src_configure() {
-  if use opengl ; then
-    echo "export BUILD_LIBRETRO_GL=1" >> libretro-config.sh
-    echo "export HAVE_OPENGL=1" >> libretro-config.sh
-  fi
-
-  if use vulkan ; then
-    echo "export HAVE_VULKAN=1" >> libretro-config.sh
-  fi
-
-  if use opengl || use vulkan ; then
-    echo "export HAVE_HW=1" >> libretro-config.sh
-    sed -i 's/"mednafen_psx"/"mednafen_psx_hw"/g' rules.d/core-rules.sh
+  if ! use opengl ; then
+    sed -i '/export BUILD_LIBRETRO_GL=1/d' "${S}/libretro-config.sh"
   fi
 }
 
@@ -202,6 +193,10 @@ multilib_src_compile() {
 
   if use vulkan ; then
     LDFLAGS="$LDFLAGS -lpthread" HAVE_PARALLEL=1 HAVE_OPENGL=0 "${S}/libretro-build.sh" parallel_n64
+  fi
+
+  if use opengl || use vulkan ; then
+    "${S}/libretro-build.sh" mednafen_psx_hw
   fi
 }
 
