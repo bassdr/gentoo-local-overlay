@@ -164,39 +164,55 @@ src_unpack() {
 
 src_prepare() {
   default
+
   sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
-  sed -i 's/RARCH_DIST_DIR=.*$//g' "${S}/libretro-install.sh"
   sed -i '/export BUILD_LIBRETRO_GL=1/d' "${S}/libretro-config.sh"
+}
 
+src_configure() {
   if use opengl ; then
-    echo "export BUILD_LIBRETRO_GL=1" >> "${S}/libretro-config.sh"
-    echo "export HAVE_OPENGL=1" >> "${S}/libretro-config.sh"
-    echo "export HAVE_HW=1" >> "${S}/libretro-config.sh"
+    echo "export BUILD_LIBRETRO_GL=1" >> libretro-config.sh
+    echo "export HAVE_OPENGL=1" >> libretro-config.sh
   fi
 
   if use vulkan ; then
-    echo "export HAVE_VULKAN=1" >> "${S}/libretro-config.sh"
-    echo "export HAVE_HW=1" >> "${S}/libretro-config.sh"
+    echo "export HAVE_VULKAN=1" >> libretro-config.sh
   fi
 
+  if use opengl || use vulkan ; then
+    echo "export HAVE_HW=1" >> libretro-config.sh
+    sed -i 's/"mednafen_psx"/"mednafen_psx_hw"/g' rules.d/core-rules.sh
+  fi
 }
 
 multilib_src_compile() {
   cd ..
 
-  RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh"
+  if [ "${MULTILIB_ABI_FLAG}" = "abi_x86_64" ] ; then
+    export PTR64=1
+  else
+    export PTR64=0
+  fi
+
+  export RARCH_DIST_DIR="${BUILD_DIR}"
+  export CXX11="${CXX}"
+
+  "${S}/libretro-build.sh"
 
   if use vulkan ; then
-    LDFLAGS="$LDFLAGS -lpthread" HAVE_PARALLEL=1 HAVE_OPENGL=0 \
-    RARCH_DIST_DIR="${BUILD_DIR}" CXX11="${CXX}" "${S}/libretro-build.sh" parallel_n64
+    LDFLAGS="$LDFLAGS -lpthread" HAVE_PARALLEL=1 HAVE_OPENGL=0 "${S}/libretro-build.sh" parallel_n64
   fi
 }
 
 multilib_src_install() {
-  exeinto "${D}/usr/$(get_libdir)/libretro"
-  doexe "${BUILD_DIR}/*.so"
+  exeinto "/usr/$(get_libdir)/libretro"
+  doexe *.so
+}
 
-  insinto "${D}/usr/share/libretro/"
+multilib_src_install_all() {
+  einstalldocs
+
+  insinto "/usr/share/libretro"
   doins -r dist/info/
 }
