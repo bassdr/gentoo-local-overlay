@@ -208,6 +208,6 @@ multilib_src_install() {
 multilib_src_install_all() {
   einstalldocs
 
-  insinto "/usr/share/libretro"
-  doins -r dist/info/
+  insinto "/usr/share/libretro/info"
+  doins dist/info/*
 }
