@@ -157,7 +157,7 @@ DEPEND=">=net-libs/libpcap-1.8.1-r2"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 
-PATCHES=( "${FILEDIR}/mednafen_psx_hw.patch" )
+PATCHES=( "${FILESDIR}/mednafen_psx_hw.patch" )
 
 src_unpack() {
   git-r3_src_unpack
