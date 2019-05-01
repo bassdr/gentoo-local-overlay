@@ -172,6 +172,8 @@ src_prepare() {
 }
 
 src_configure() {
+  multilib-minimal_src_configure
+
   if ! use opengl ; then
     sed -i '/export BUILD_LIBRETRO_GL=1/d' "${S}/libretro-config.sh"
   fi
