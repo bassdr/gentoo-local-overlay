@@ -157,7 +157,10 @@ DEPEND=">=net-libs/libpcap-1.8.1-r2"
 RDEPEND="${DEPEND}"
 BDEPEND=""
 
-PATCHES=( "${FILESDIR}/mednafen_psx_hw.patch" )
+PATCHES=(
+  "${FILESDIR}/mednafen_psx_hw.patch"
+  "${FILESDIR}/libretro-mame2016-makefile.patch"
+)
 
 src_unpack() {
   git-r3_src_unpack
@@ -169,6 +172,10 @@ src_prepare() {
 
   sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
+
+  pushd "${WORKDIR}/libretro-stonesoup"
+    epatch "${FILESDIR}/libretro-stonesoup-functional.patch"
+  popd
 }
 
 src_configure() {
@@ -180,7 +187,7 @@ src_configure() {
 }
 
 multilib_src_compile() {
-  cd ..
+  cd "${WORKDIR}"
 
   if [ "${MULTILIB_ABI_FLAG}" = "abi_x86_64" ] ; then
     export PTR64=1
@@ -194,7 +201,7 @@ multilib_src_compile() {
   "${S}/libretro-build.sh"
 
   if use vulkan ; then
-    LDFLAGS="$LDFLAGS -lpthread" HAVE_PARALLEL=1 HAVE_OPENGL=0 "${S}/libretro-build.sh" parallel_n64
+    "${S}/libretro-build.sh" parallel_n64
   fi
 
   if use opengl || use vulkan ; then
