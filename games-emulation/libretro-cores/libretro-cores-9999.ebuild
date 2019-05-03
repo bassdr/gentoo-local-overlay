@@ -170,11 +170,16 @@ src_unpack() {
 src_prepare() {
   default
 
+  # Replace the custom make -j$JOBS by ebuild's ${MAKEOPTS}
   sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
 
+  # This core does not compile...
+  sed -i '/libretro_build_core emux/d' libretro-build.sh
+
+  # Easily fixed compile issue
   pushd "${WORKDIR}/libretro-stonesoup"
-    epatch "${FILESDIR}/libretro-stonesoup-functional.patch"
+    eapply "${FILESDIR}/libretro-stonesoup-functional.patch"
   popd
 }
 
@@ -198,14 +203,14 @@ multilib_src_compile() {
   export RARCH_DIST_DIR="${BUILD_DIR}"
   export CXX11="${CXX}"
 
-  "${S}/libretro-build.sh"
+  "${S}/libretro-build.sh" || die "some core(s) did not compile"
 
   if use vulkan ; then
-    "${S}/libretro-build.sh" parallel_n64
+    "${S}/libretro-build.sh" parallel_n64 || die "parallel_n64 did not compile"
   fi
 
   if use opengl || use vulkan ; then
-    "${S}/libretro-build.sh" mednafen_psx_hw
+    "${S}/libretro-build.sh" mednafen_psx_hw || die "mednafen_psx_hw did not compile"
   fi
 }
 
