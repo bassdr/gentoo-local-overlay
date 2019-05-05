@@ -1,5 +1,50 @@
+From 658076cd8ee82072fcc5850bdc61842a66371f2a Mon Sep 17 00:00:00 2001
+From: David Racine <david.racine.1@gmail.com>
+Date: Thu, 2 May 2019 20:15:30 -0400
+Subject: [PATCH 1/2] Added mednafen_psx_hw, fixed build errors, and added it
+ to the list of default GL-enabled cores
+
+---
+ build-config.sh       |  1 +
+ libretro-build.sh     |  3 ++-
+ rules.d/core-rules.sh | 58 ++++++++-----------------------------------
+ 3 files changed, 14 insertions(+), 48 deletions(-)
+
+diff --git a/build-config.sh b/build-config.sh
+index 9cc03747..1db2a128 100644
+--- a/build-config.sh
++++ b/build-config.sh
+@@ -90,6 +90,7 @@ include_core_vice_xvic
+ include_core_vice_xplus4
+ # --- PlayStation1 emulator cores ---
+ include_core_mednafen_psx
++include_core_mednafen_psx_hw
+ include_core_pcsx_rearmed
+ include_core_pcsx1
+ include_core_rustation
+diff --git a/libretro-build.sh b/libretro-build.sh
+index 717af8ef..01b0b578 100755
+--- a/libretro-build.sh
++++ b/libretro-build.sh
+@@ -142,6 +142,8 @@ build_default_cores_libretro_gl() {
+ 	if [ $platform != "psp1" ]; then
+ 		libretro_build_core 3dengine
+ 	fi
++
++	libretro_build_core mednafen_psx_hw
+ }
+ 
+ # These build everywhere libretro-build.sh works
+@@ -226,7 +228,6 @@ build_default_cores() {
+ 
+ 			# Excluded for performance reasons
+ 			libretro_build_core mednafen_pcfx
+-			libretro_build_core mednafen_psx
+ 			if [ $platform != "qnx" ]; then
+ 				libretro_build_core mednafen_snes
+ 			fi
 diff --git a/rules.d/core-rules.sh b/rules.d/core-rules.sh
-index 0b39725a..0b8db6be 100644
+index 70531995..1d37cecf 100644
 --- a/rules.d/core-rules.sh
 +++ b/rules.d/core-rules.sh
 @@ -29,7 +29,6 @@ include_core_crocods() {
@@ -202,7 +247,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_meteor() {
  	register_module core "meteor" -ngc -ps3 -psp1 -qnx -wii
-@@ -397,7 +371,6 @@ register_module core "melonds" -ngc -ps3 -psp1 -qnx -wii
+@@ -405,7 +379,6 @@ register_module core "melonds" -ngc -ps3 -psp1 -qnx -wii
  }
  libretro_melonds_name="melonDS"
  libretro_melonds_git_url="https://github.com/libretro/melonDS.git"
@@ -210,7 +255,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_openlara() {
  register_module core "openlara" -ngc -ps3 -psp1 -qnx -wii
-@@ -405,7 +378,6 @@ register_module core "openlara" -ngc -ps3 -psp1 -qnx -wii
+@@ -413,7 +386,6 @@ register_module core "openlara" -ngc -ps3 -psp1 -qnx -wii
  libretro_openlara_name="OpenLara"
  libretro_openlara_git_url="https://github.com/libretro/OpenLara.git"
  libretro_openlara_build_subdir="src/platform/libretro"
@@ -218,7 +263,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_cannonball() {
  	register_module core "cannonball" -ngc -wii
-@@ -434,7 +406,6 @@ include_core_quicknes() {
+@@ -442,7 +414,6 @@ include_core_quicknes() {
  }
  libretro_quicknes_name="QuickNES"
  libretro_quicknes_git_url="https://github.com/libretro/QuickNES_Core.git"
@@ -226,7 +271,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_nestopia() {
  	register_module core "nestopia"
-@@ -463,7 +434,6 @@ include_core_tyrquake() {
+@@ -471,7 +442,6 @@ include_core_tyrquake() {
  }
  libretro_tyrquake_name="TyrQuake"
  libretro_tyrquake_git_url="https://github.com/libretro/tyrquake.git"
@@ -234,7 +279,22 @@ index 0b39725a..0b8db6be 100644
  
  include_core_pcsx_rearmed() {
  	register_module core "pcsx_rearmed" -theos_ios -ngc -ps3 -psp1 -wii
-@@ -594,7 +564,7 @@ include_core_dosbox() {
+@@ -533,6 +503,14 @@ include_core_mednafen_psx() {
+ libretro_mednafen_psx_name="Mednafen/Beetle PSX"
+ libretro_mednafen_psx_git_url="https://github.com/libretro/beetle-psx-libretro.git"
+ 
++include_core_mednafen_psx_hw() {
++	register_module core "mednafen_psx_hw" -theos_ios -ngc -psp1
++}
++libretro_mednafen_psx_hw_name="Mednafen/Beetle PSX (hardware accelerated)"
++libretro_mednafen_psx_hw_git_url="https://github.com/libretro/beetle-psx-libretro.git"
++libretro_mednafen_psx_hw_dir="libretro-mednafen_psx"
++libretro_mednafen_psx_hw_build_args="HAVE_HW=1"
++
+ include_core_mednafen_saturn() {
+ 	register_module core "mednafen_saturn" -theos_ios -ngc -psp1
+ }
+@@ -602,7 +580,7 @@ include_core_dosbox() {
  }
  libretro_dosbox_name="DOSBox"
  libretro_dosbox_git_url="https://github.com/libretro/dosbox-libretro.git"
@@ -243,7 +303,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_basilisk2() {
  	register_module core "basilisk2" -ngc -ps3 -psp1 -wii
-@@ -602,63 +572,56 @@ include_core_basilisk2() {
+@@ -610,63 +588,56 @@ include_core_basilisk2() {
  libretro_basilisk2_name="Basilisk II"
  libretro_basilisk2_git_url="https://github.com/libretro/Basilisk2.git"
  libretro_basilisk2_build_subdir="BasiliskII/src/libretro"
@@ -309,7 +369,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_mame() {
  	register_module core "mame" -theos_ios -ngc -ps3 -psp1 -qnx -wii
-@@ -819,7 +782,6 @@ include_core_remotejoy() {
+@@ -827,7 +798,6 @@ include_core_remotejoy() {
  }
  libretro_remotejoy_name="RemoteJoy"
  libretro_remotejoy_git_url="https://github.com/libretro/libretro-remotejoy.git"
@@ -317,7 +377,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_bluemsx() {
  	register_module core "bluemsx" -ps3
-@@ -955,7 +917,6 @@ include_core_chailove() {
+@@ -963,7 +933,6 @@ include_core_chailove() {
  libretro_chailove_name="ChaiLove"
  libretro_chailove_git_url="https://github.com/libretro/ChaiLove.git"
  libretro_chailove_git_submodules="yes"
@@ -325,7 +385,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_81() {
  	register_module core "81" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
-@@ -969,14 +930,12 @@ include_core_lutro() {
+@@ -977,14 +946,12 @@ include_core_lutro() {
  }
  libretro_lutro_name="Lutro"
  libretro_lutro_git_url="https://github.com/libretro/libretro-lutro.git"
@@ -340,7 +400,7 @@ index 0b39725a..0b8db6be 100644
  
  include_core_nekop2() {
  	register_module core "nekop2" -theos_ios -ngc -ps3 -psp1 -qnx -wii
-@@ -1013,21 +972,18 @@ include_core_atari800() {
+@@ -1021,21 +988,18 @@ include_core_atari800() {
  }
  libretro_atari800_name="Atari800"
  libretro_atari800_git_url="https://github.com/libretro/libretro-atari800.git"
@@ -362,3 +422,6 @@ index 0b39725a..0b8db6be 100644
  libretro_mu_build_subdir="libretroBuildSystem"
  
  
+-- 
+2.21.0
+

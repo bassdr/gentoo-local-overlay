@@ -1,0 +1,100 @@
+From dc33cfd5b6937ba304f8c709925e3a76ca6521a5 Mon Sep 17 00:00:00 2001
+From: David Racine <david.racine.1@gmail.com>
+Date: Sat, 4 May 2019 22:26:14 -0400
+Subject: [PATCH 2/2] Split emux into 4 separate core, otherwise was always
+ failing because the Makefile can only build one at a time
+
+---
+ build-config.sh       |  5 ++++-
+ libretro-build.sh     |  5 ++++-
+ rules.d/core-rules.sh | 42 +++++++++++++++++++++++++++++++++++-------
+ 3 files changed, 43 insertions(+), 9 deletions(-)
+
+diff --git a/build-config.sh b/build-config.sh
+index 1db2a128..5e6304da 100644
+--- a/build-config.sh
++++ b/build-config.sh
+@@ -185,7 +185,10 @@ include_core_np2kai
+ include_core_px68k
+ 
+ include_core_hatari
+-include_core_emux
++include_core_emux_chip8
++include_core_emux_gb
++include_core_emux_nes
++include_core_emux_sms
+ include_core_lutro
+ include_core_uzem
+ 
+diff --git a/libretro-build.sh b/libretro-build.sh
+index 01b0b578..4c5f0302 100755
+--- a/libretro-build.sh
++++ b/libretro-build.sh
+@@ -248,7 +248,10 @@ build_default_cores() {
+ 			build_default_cores_cpp11
+ 
+ 			# Just basic compilation issues right now for these platforms
+-			libretro_build_core emux
++			libretro_build_core emux_chip8
++			libretro_build_core emux_gb
++			libretro_build_core emux_nes
++			libretro_build_core emux_sms
+ 
+ 			if [ $platform != "win" ]; then
+ 				# Reasons for not compiling this on Windows yet -
+diff --git a/rules.d/core-rules.sh b/rules.d/core-rules.sh
+index 1d37cecf..4e06b540 100644
+--- a/rules.d/core-rules.sh
++++ b/rules.d/core-rules.sh
+@@ -903,13 +903,41 @@ include_core_gpsp() {
+ libretro_gpsp_name="gpSP"
+ libretro_gpsp_git_url="https://github.com/libretro/gpsp.git"
+ 
+-include_core_emux() {
+-	register_module core "emux" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
+-}
+-libretro_emux_name="Emux"
+-libretro_emux_git_url="https://github.com/libretro/emux.git"
+-libretro_emux_build_subdir=libretro
+-libretro_emux_build_cores="emux_chip8 emux_gb emux_nes emux_sms"
++include_core_emux_chip8() {
++	register_module core "emux_chip8" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
++}
++libretro_emux_chip8_name="Emux CHIP-8"
++libretro_emux_chip8_git_url="https://github.com/libretro/emux.git"
++libretro_emux_chip8_build_subdir=libretro
++libretro_emux_chip8_dir="libretro-emux"
++libretro_emux_chip8_build_args="MACHINE=chip8"
++
++include_core_emux_gb() {
++	register_module core "emux_gb" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
++}
++libretro_emux_gb_name="Emux GB"
++libretro_emux_gb_git_url="https://github.com/libretro/emux.git"
++libretro_emux_gb_build_subdir=libretro
++libretro_emux_gb_dir="libretro-emux"
++libretro_emux_gb_build_args="MACHINE=gb"
++
++include_core_emux_nes() {
++	register_module core "emux_nes" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
++}
++libretro_emux_nes_name="Emux NES"
++libretro_emux_nes_git_url="https://github.com/libretro/emux.git"
++libretro_emux_nes_build_subdir=libretro
++libretro_emux_nes_dir="libretro-emux"
++libretro_emux_nes_build_args="MACHINE=nes"
++
++include_core_emux_sms() {
++	register_module core "emux_sms" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
++}
++libretro_emux_sms_name="Emux SMS"
++libretro_emux_sms_git_url="https://github.com/libretro/emux.git"
++libretro_emux_sms_build_subdir=libretro
++libretro_emux_sms_dir="libretro-emux"
++libretro_emux_sms_build_args="MACHINE=sms"
+ 
+ include_core_fuse() {
+ 	register_module core "fuse" -theos_ios -ngc -sncps3 -ps3 -psp1 -qnx -wii
+-- 
+2.21.0
+

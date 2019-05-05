@@ -19,8 +19,8 @@ RDEPEND="${DEPEND}"
 BDEPEND=""
 
 PATCHES=(
-  "${FILESDIR}/mednafen_psx_hw.patch"
-  "${FILESDIR}/libretro-mame2016-makefile.patch"
+  "${FILESDIR}/rules.d-mednafen_psx_hw-mame2016.patch"
+  "${FILESDIR}/rules.d-emux.patch"
 )
 
 src_unpack() {
@@ -35,19 +35,21 @@ src_prepare() {
   sed -i 's/\\\"-j$JOBS\\\"/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
   sed -i 's/-j$JOBS/${MAKEOPTS}/g' "${S}/libretro-build-common.sh"
 
-  # This core does not compile... TODO: fixit
-  sed -i '/libretro_build_core emux/d' libretro-build.sh
+  # Add a generic Makefile in emux
+  pushd "${WORKDIR}/libretro-emux"
+    eapply "${FILESDIR}/libretro-emux-add-makefile.patch"
+  popd
 
   # Fix stonesoup compile errors
   pushd "${WORKDIR}/libretro-stonesoup"
-    eapply "${FILESDIR}/libretro-stonesoup-functional.patch"
+    eapply "${FILESDIR}/libretro-stonesoup-compile-fix.patch"
   popd
 }
 
 src_configure() {
   multilib-minimal_src_configure
 
-  #rewrite the whole config, it's too messy to be modified from this ebuild
+  # Rewrite the whole config, it's too messy to be modified or appended to
   #TODO: support more architecture
   cat << "  EOF" > "${S}/libretro-config.sh"
     LIBRETRO_DEVELOPER=1
@@ -72,7 +74,7 @@ src_configure() {
         export PTR64=0
         ;;
       *)
-        echo "FATAL ERROR, unknown ABI '${MULTILIB_ABI_FLAG}'" 2>&1
+        echo "FATAL ERROR, unknown MULTILIB_ABI_FLAG='${MULTILIB_ABI_FLAG}'" 2>&1
         exit 1
         ;;
       esac
@@ -80,6 +82,7 @@ src_configure() {
 
     # Platform Assignment
     config_platform() {
+      platform="Linux"
       BINARY_EXT=""
       FORMAT_COMPILER_TARGET="unix"
       FORMAT_EXT="so"

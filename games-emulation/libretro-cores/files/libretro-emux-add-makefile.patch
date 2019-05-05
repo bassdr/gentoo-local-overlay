@@ -1,0 +1,70 @@
+diff --git a/libretro/Makefile b/libretro/Makefile
+new file mode 100644
+index 0000000..82f8c16
+--- /dev/null
++++ b/libretro/Makefile
+@@ -0,0 +1,64 @@
++##############
++# Works on hosts Linux
++# 
++
++#########################
++# Check the host platform
++
++HOST_PLATFORM = linux
++TARGET_PLATFORM = linux_x86_64
++
++############
++# Extensions
++
++OBJEXT = .o
++SOEXT  = .so
++LIBEXT = .a
++
++################
++# Platform setup
++
++STATIC_LINKING = 0
++PLATCFLAGS     = -fpic -fstrict-aliasing
++PLATLDFLAGS    = -shared -lm -Wl,-version-script=$(BUILD_DIR)/link.T -Wl,-no-undefined
++
++################
++# libretro setup
++
++RETRODEFS     = -D__LIBRETRO__
++
++#################
++# Final variables
++
++DEFINES  += $(RETRODEFS)
++CFLAGS   += $(PLATCFLAGS) $(DEFINES)
++CXXFLAGS += $(PLATCFLAGS) $(DEFINES)
++LDFLAGS  += $(PLATLDFLAGS)
++LDXFLAGS += $(PLATLDFLAGS)
++
++########
++# Tuning
++
++ifeq ($(DEBUG),)
++  CFLAGS   += -DNDEBUG
++  CXXFLAGS += -DNDEBUG
++endif
++
++ifneq ($(LOG_PERFORMANCE),)
++  CFLAGS   += -DLOG_PERFORMANCE
++  CXXFLAGS += -DLOG_PERFORMANCE
++endif
++
++####################################
++# Variable setup for Makefile.common
++
++CORE_DIR  ?= ..
++BUILD_DIR ?= .
++INCLUDES   = 
++
++include $(BUILD_DIR)/Makefile.common
++
++###############
++# Include rules
++
++include $(BUILD_DIR)/Makefile.rules
