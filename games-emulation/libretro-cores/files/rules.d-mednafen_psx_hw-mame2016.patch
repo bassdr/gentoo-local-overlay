@@ -35,14 +35,6 @@ index 717af8ef..01b0b578 100755
  }
  
  # These build everywhere libretro-build.sh works
-@@ -226,7 +228,6 @@ build_default_cores() {
- 
- 			# Excluded for performance reasons
- 			libretro_build_core mednafen_pcfx
--			libretro_build_core mednafen_psx
- 			if [ $platform != "qnx" ]; then
- 				libretro_build_core mednafen_snes
- 			fi
 diff --git a/rules.d/core-rules.sh b/rules.d/core-rules.sh
 index 70531995..1d37cecf 100644
 --- a/rules.d/core-rules.sh

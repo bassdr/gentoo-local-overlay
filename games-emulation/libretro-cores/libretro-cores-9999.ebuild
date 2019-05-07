@@ -53,6 +53,7 @@ src_configure() {
   #TODO: support more architecture
   cat << "  EOF" > "${S}/libretro-config.sh"
     LIBRETRO_DEVELOPER=1
+    SKIP_UNCHANGED=1
 
     # Architecture Assignment
     config_cpu() {
@@ -117,16 +118,15 @@ multilib_src_compile() {
   export MULTILIB_ABI_FLAG
 
   # build all cores considered stable upstream for this ABI
-  "${S}/libretro-build.sh" || die "some core(s) did not compile"
+  "${S}/libretro-build.sh"
+
+  # hack to retry any core that failed with -j1
+  # the script will not recompile a core that built previously
+  MAKEOPTS="-j1" "${S}/libretro-build.sh"
 
   # build parallel_n64 only if vulkan is set, as this one is optimized for vulkan
   if use vulkan ; then
-    "${S}/libretro-build.sh" parallel_n64 || die "parallel_n64 did not compile"
-  fi
-
-  # build mednafen_psx_hw only of opengl or vulkan hw-acceleration is enabled
-  if use opengl || use vulkan ; then
-    "${S}/libretro-build.sh" mednafen_psx_hw || die "mednafen_psx_hw did not compile"
+    "${S}/libretro-build.sh" parallel_n64
   fi
 }
 
