@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>floppym@gentoo.org</email>
+		<name>Mike Gilbert</name>
+	</maintainer>
+	<use>
+		<flag name="faac">Enable feature FAAC for codec</flag>
+		<flag name="faad">Enable feature FAAD2 for codec</flag>
+		<flag name="mbedtls">Enable feature MbedTLS for cryptography</flag>
+		<flag name="opencl">Enable feature OpenCL for codec</flag>
+		<flag name="openh264">Enable H.264 support using <pkg>media-libs/openh264</pkg></flag>
+		<flag name="server">Build server binaries</flag>
+		<flag name="soxr">Enable feature soxr for codec</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">FreeRDP/FreeRDP</remote-id>
+	</upstream>
+</pkgmetadata>
