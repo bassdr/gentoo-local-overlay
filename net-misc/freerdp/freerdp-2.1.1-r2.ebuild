@@ -22,7 +22,7 @@ HOMEPAGE="http://www.freerdp.com/"
 
 LICENSE="Apache-2.0"
 SLOT="0/2"
-IUSE="alsa cpu_flags_arm_neon cpu_flags_x86_sse2 cups debug doc faac faad +ffmpeg gsm icu jpeg lame libressl mbedtls opencl openh264 pulseaudio server smartcard soxr systemd test usb vaapi wayland X xinerama xv"
+IUSE="alsa cpu_flags_arm_neon cpu_flags_x86_sse2 cups debug doc +faac +faad +ffmpeg +gsm +gstreamer icu jpeg lame libressl mbedtls opencl +openh264 pulseaudio server smartcard soxr systemd test +usb vaapi wayland X xinerama +xv"
 RESTRICT="!test? ( test )"
 
 RDEPEND="
@@ -49,6 +49,11 @@ RDEPEND="
 	ffmpeg? ( media-video/ffmpeg:0= )
 	!ffmpeg? ( x11-libs/cairo:0= )
 	gsm? ( media-sound/gsm )
+	gstreamer? (
+		media-libs/gstreamer:1.0
+		media-libs/gst-plugins-base:1.0
+		x11-libs/libXrandr
+	)
 	faac? ( media-libs/faac )
 	faad? ( media-libs/faad2 )
 	soxr? ( media-libs/soxr )
@@ -104,6 +109,7 @@ src_configure() {
 		-DWITH_FAAD2=$(usex faad ON OFF)
 		-DWITH_FFMPEG=$(usex ffmpeg ON OFF)
 		-DWITH_GSM=$(usex gsm ON OFF)
+		-DWITH_GSTREAMER_1_0=$(usex gstreamer ON OFF)
 		-DWITH_ICU=$(usex icu ON OFF)
 		-DWITH_JPEG=$(usex jpeg ON OFF)
 		-DWITH_LAME=$(usex lame ON OFF)
