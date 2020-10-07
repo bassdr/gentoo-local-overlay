@@ -13,7 +13,7 @@ KEYWORDS="~amd64 ~x86"
 IUSE=""
 
 DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND} >=app-admin/eclean-kernel-2"
 
 src_install() {
     dobin emerge-update
