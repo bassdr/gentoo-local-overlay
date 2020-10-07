@@ -8,4 +8,7 @@
 	<upstream>
 		<remote-id type="github">mongodb/mongo-cxx-driver</remote-id>
 	</upstream>
+	<use>
+		<flag name="static-mongoc">Use static mongo-c-driver libraries with shared mongo-cxx-driver libraries</flag>
+	</use>
 </pkgmetadata>
