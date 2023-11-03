@@ -14,25 +14,30 @@ SLOT="0"
 
 KEYWORDS="arm64"
 
-IUSE="+airplay2 +alac alsa convolution pulseaudio jack mbedtls +openssl soundio soxr systemd"
-REQUIRED_USE="|| ( alsa pulseaudio jack ) ^^ ( openssl mbedtls )"
+IUSE="+airplay2 +alac alsa convolution daemon pipewire pulseaudio jack mbedtls +openssl soundio soxr systemd"
+
+REQUIRED_USE="
+	|| ( alsa jack pipewire pulseaudio )
+	^^ ( openssl mbedtls )
+"
 
 BDEPEND="
 	airplay2? ( app-editors/vim-core )
 "
 
 RDEPEND="
-	acct-user/shairport-sync
-	acct-group/shairport-sync
+	acct-user/${PN}
+	acct-group/${PN}
 	dev-libs/libconfig
-	dev-libs/libdaemon
 	net-dns/avahi
-	airplay2? ( app-pda/libplist dev-libs/libsodium net-misc/nqptp )
+	airplay2? ( app-pda/libplist dev-libs/libsodium >=net-misc/nqptp-1.2.4 )
 	alac? ( media-libs/alac )
 	alsa? ( media-libs/alsa-lib )
 	convolution? ( media-libs/libsndfile )
+	daemon? ( dev-libs/libdaemon )
 	jack? ( virtual/jack )
 	openssl? ( dev-libs/openssl )
+	pipewire? ( media-video/pipewire )
 	pulseaudio? ( media-libs/libpulse )
 	mbedtls? ( net-libs/mbedtls )
 	soundio? ( media-libs/libsoundio )
@@ -61,10 +66,13 @@ src_configure() {
 		$(use_with alac apple-alac) \
 		$(use_with alsa) \
 		$(use_with convolution) \
+		$(use_with daemon libdaemon) \
 		$(use_with jack) \
 		--with-ssl=$(usex mbedtls 'mbedtls' 'openssl') \
+		$(use_with pipewire pw) \
 		$(use_with pulseaudio pa) \
 		$(use_with soundio) \
 		$(use_with soxr) \
-		--with-$(usex systemd 'systemd' 'systemv')
+		$(use_with systemd)
+		$(use_with !systemd 'systemv')
 }
