@@ -4,7 +4,7 @@
 EAPI=8
 
 DISTUTILS_USE_PEP517=poetry
-PYTHON_COMPAT=( python3_{10..11} pypy3 )
+PYTHON_COMPAT=( python3_{11..12} pypy3 )
 inherit distutils-r1
 
 MY_PN=${PN/-/_}
@@ -30,7 +30,6 @@ RDEPEND="
 	dev-python/pyxdg[${PYTHON_USEDEP}]
 	dev-python/requests[${PYTHON_USEDEP}]
 	dev-python/structlog[${PYTHON_USEDEP}]
-	dev-python/tomli[${PYTHON_USEDEP}]
 	dev-python/setuptools[${PYTHON_USEDEP}]
 	dev-python/PyQt6[${PYTHON_USEDEP},webchannel]
 	dev-python/PyQt6-WebEngine[${PYTHON_USEDEP}]

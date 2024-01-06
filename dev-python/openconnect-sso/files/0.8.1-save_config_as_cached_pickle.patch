@@ -10,7 +10,7 @@ diff -ur openconnect-sso-0.8.1.orig/openconnect_sso/config.py openconnect-sso-0.
  import pyotp
  import structlog
 -import toml
-+import tomli
++import tomllib
  import xdg.BaseDirectory
  
  logger = structlog.get_logger()
@@ -42,7 +42,7 @@ diff -ur openconnect-sso-0.8.1.orig/openconnect_sso/config.py openconnect-sso-0.
 +    if not cache_path.exists() or (config_path.exists() and os.stat(config_path).st_mtime > os.stat(cache_path).st_mtime):
 +        with config_path.open("rb") as config_file:
 +            try:
-+                return Config.from_dict(tomli.load(config_file))
++                return Config.from_dict(tomllib.load(config_file))
 +            except Exception:
 +                logger.error(
 +                    "Could not load configuration file, ignoring",
@@ -85,5 +85,3 @@ diff -ur openconnect-sso-0.8.1.orig/openconnect_sso/config.py openconnect-sso-0.
  @attr.s
  class ConfigNode:
      @classmethod
-Seulement dans openconnect-sso-0.8.1/openconnect_sso: config.py.orig
-Seulement dans openconnect-sso-0.8.1/openconnect_sso: config.py.rej
