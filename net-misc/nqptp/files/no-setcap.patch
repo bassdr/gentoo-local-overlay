@@ -1,0 +1,16 @@
+diff -ur nqptp-1.2.4.orig/Makefile.am nqptp-1.2.4/Makefile.am
+--- nqptp-1.2.4.orig/Makefile.am	2023-10-21 17:45:02.800849857 -0400
++++ nqptp-1.2.4/Makefile.am	2023-10-21 17:45:57.127832403 -0400
+@@ -19,12 +19,8 @@
+ 
+ install-exec-hook:
+ if BUILD_FOR_LINUX
+-# NQPTP runs as user/group nqptp/nqptp on Linux and uses setcap to access ports 319 and 320
+-	setcap 'cap_net_bind_service=+ep' $(bindir)/nqptp
+ # no installer for System V
+ if INSTALL_SYSTEMD_STARTUP
+-	getent group nqptp &>/dev/null || groupadd -r nqptp &>/dev/null
+-	getent passwd nqptp &> /dev/null || useradd -r -M -g nqptp -s /usr/sbin/nologin nqptp &>/dev/null
+ 	[ -e $(DESTDIR)$(libdir)/systemd/system ] || mkdir -p $(DESTDIR)$(libdir)/systemd/system
+ # don't replace a service file if it already exists...
+ 	[ -e $(DESTDIR)$(libdir)/systemd/system/nqptp.service ] || cp nqptp.service $(DESTDIR)$(libdir)/systemd/system

@@ -1,0 +1,86 @@
+diff -ur openconnect-sso-0.7.3.orig/openconnect_sso/config.py openconnect-sso-0.7.3/openconnect_sso/config.py
+--- openconnect-sso-0.7.3.orig/openconnect_sso/config.py	2023-06-06 13:13:55.256465587 -0400
++++ openconnect-sso-0.7.3/openconnect_sso/config.py	2023-06-06 13:14:25.827978172 -0400
+@@ -5,8 +5,10 @@
+ import attr
+ import keyring
+ import keyring.errors
++import os
++import pickle
+ import structlog
+-import toml
++import tomli
+ import xdg.BaseDirectory
+ 
+ logger = structlog.get_logger()
+@@ -15,37 +17,48 @@
+ 
+ 
+ def load():
+-    path = xdg.BaseDirectory.load_first_config(APP_NAME)
+-    if not path:
+-        return Config()
+-    config_path = Path(path) / "config.toml"
+-    if not config_path.exists():
++    config_path = Path(xdg.BaseDirectory.load_first_config(APP_NAME)) / "config.toml"
++    cache_path = Path(xdg.BaseDirectory.save_cache_path(APP_NAME)) / "config.pkl"
++
++    if not config_path.exists() and not cache_path.exists():
+         return Config()
+-    with config_path.open() as config_file:
+-        try:
+-            return Config.from_dict(toml.load(config_file))
+-        except Exception:
+-            logger.error(
+-                "Could not load configuration file, ignoring",
+-                path=config_path,
+-                exc_info=True,
+-            )
+-            return Config()
++
++    if not cache_path.exists() or (config_path.exists() and os.stat(config_path).st_mtime > os.stat(cache_path).st_mtime):
++        with config_path.open("rb") as config_file:
++            try:
++                return Config.from_dict(tomli.load(config_file))
++            except Exception:
++                logger.error(
++                    "Could not load configuration file, ignoring",
++                    path=config_path,
++                    exc_info=True,
++                )
++                return Config()
++    else:
++        with cache_path.open("rb") as cache_file:
++            try:
++                return Config.from_dict(pickle.load(cache_file))
++            except Exception:
++                logger.error(
++                    "Could not load cached pickle configuration file, ignoring",
++                    path=cache_path,
++                    exc_info=True,
++                )
++                return Config()
++
+ 
+ 
+ def save(config):
+-    path = xdg.BaseDirectory.save_config_path(APP_NAME)
+-    config_path = Path(path) / "config.toml"
++    cache_path = Path(xdg.BaseDirectory.save_cache_path(APP_NAME)) / "config.pkl"
+     try:
+-        config_path.touch()
+-        with config_path.open("w") as config_file:
+-            toml.dump(config.as_dict(), config_file)
++        cache_path.touch
++        with cache_path.open("wb") as cache_file:
++            pickle.dump(config.as_dict(), cache_file)
+     except Exception:
+         logger.error(
+-            "Could not save configuration file", path=config_path, exc_info=True
++            "Could not save cached pickle configuration file", path=cache_path, exc_info=True
+         )
+ 
+-
+ @attr.s
+ class ConfigNode:
+     @classmethod
