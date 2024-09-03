@@ -1,0 +1,23 @@
+# Path to anbox executable
+#ANBOX_EXEC=/usr/bin/anbox
+
+# Path where the container and its data is stored                                                     
+#ANDROID_DATA_PATH=/var/lib/anbox
+
+# Path to the Android rootfs image file if not stored in the data path                                
+#ANBOX_OPTIONS="$ANBOX_OPTIONS --android-image=/var/lib/anbox/android.img"
+
+# Run Android container in privileged mode                                                            
+#ANBOX_OPTIONS="$ANBOX_OPTIONS --privileged"
+
+# Use an overlay for the Android rootfs 
+#ANBOX_OPTIONS="$ANBOX_OPTIONS --use-rootfs-overlay"
+
+# Assign the specified network address to the Android container                                       
+#ANBOX_OPTIONS="$ANBOX_OPTIONS --container-network-address=192.168.250.2"
+
+# Assign the specified network gateway to the Android container                                       
+#ANBOX_OPTIONS="$ANBOX_OPTIONS --container-network-gateway=192.168.250.1"
+
+# Assign the specified DNS servers to the Android container
+#ANBOX_OPTIONS="$ANBOX_OPTIONS --container-network-dns-servers=8.8.8.8"

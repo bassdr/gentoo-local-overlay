@@ -1,0 +1,12 @@
+diff -uwr work.orig/nuget-Release-2.8.7-MonoDevelop/src/Core/Core.csproj work/nuget-Release-2.8.7-MonoDevelop/src/Core/Core.csproj
+--- work.orig/nuget-Release-2.8.7-MonoDevelop/src/Core/Core.csproj	2016-07-07 20:28:04.486263326 -0400
++++ work/nuget-Release-2.8.7-MonoDevelop/src/Core/Core.csproj	2016-07-07 20:32:31.229498551 -0400
+@@ -12,6 +12,8 @@
+     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+     <TargetFrameworkProfile Condition=" '$(MonoBuild)' == '' And '$(TargetFrameworkVersion)' == 'v4.0' "></TargetFrameworkProfile>
+     <PlatformTarget>AnyCPU</PlatformTarget>
++    <SignAssembly>true</SignAssembly>
++    <AssemblyOriginatorKeyFile>rsa-4096.snk</AssemblyOriginatorKeyFile>
+   </PropertyGroup>
+   <ItemGroup>
+     <EmbeddedResource Include="..\..\Common\CommonResources.resx">

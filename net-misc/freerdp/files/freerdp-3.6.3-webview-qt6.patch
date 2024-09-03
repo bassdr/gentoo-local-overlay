@@ -1,0 +1,46 @@
+diff --git a/client/SDL/common/aad/CMakeLists.txt b/client/SDL/common/aad/CMakeLists.txt
+index 4a72fba54..46108bc52 100644
+--- a/client/SDL/common/aad/CMakeLists.txt
++++ b/client/SDL/common/aad/CMakeLists.txt
+@@ -22,7 +22,8 @@ endif()
+ 
+ option(WITH_WEBVIEW "Build with WebView support for AAD login popup browser" ${WITH_WEBVIEW_DEFAULT})
+ if (WITH_WEBVIEW)
+-  option(WITH_WEBVIEW_QT "Build with QtWebEngine support for AAD login broweser popup" OFF)
++  option(WITH_WEBVIEW_QT "Build with QtWebEngine:5 support for AAD login browser popup" OFF)
++  option(WITH_WEBVIEW_QT6 "Build with QtWebEngine:6 support for AAD login browser popup" OFF)
+ 
+   set(SRCS
+     sdl_webview.hpp
+@@ -33,15 +34,19 @@ if (WITH_WEBVIEW)
+     winpr
+   )
+ 
+-  if (WITH_WEBVIEW_QT)
+-    find_package(Qt5 COMPONENTS WebEngineWidgets REQUIRED)
++  if (WITH_WEBVIEW_QT OR WITH_WEBVIEW_QT6)
++    if (WITH_WEBVIEW_QT6)
++        find_package(Qt6 COMPONENTS WebEngineWidgets REQUIRED)
++    else()
++        find_package(Qt5 COMPONENTS WebEngineWidgets REQUIRED)
++    endif()
+ 
+     list(APPEND SRCS
+       qt/webview_impl.cpp
+     )
+ 
+     list(APPEND LIBS
+-      Qt5::WebEngineWidgets
++      Qt::WebEngineWidgets
+     )
+   else()
+     list(APPEND SRCS
+@@ -88,7 +93,7 @@ target_compile_definitions(
+   PUBLIC
+   ${DEFINITIONS}
+ )
+-if (WITH_WEBVIEW AND NOT WITH_WEBVIEW_QT)
++if (WITH_WEBVIEW AND NOT (WITH_WEBVIEW_QT OR WITH_WEBVIEW_QT6))
+     include (WebView2)
+     target_link_webview2("sdl-common-aad-view")
+ endif()

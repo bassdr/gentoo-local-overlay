@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>bass_dr@hotmail.com</email>
+		<name>David Racine</name>
+	</maintainer>
+	<upstream>
+		<remote-id type="github">mongodb/mongo-cxx-driver</remote-id>
+	</upstream>
+	<use>
+		<flag name="static-mongoc">Use static mongo-c-driver libraries with shared mongo-cxx-driver libraries</flag>
+	</use>
+</pkgmetadata>

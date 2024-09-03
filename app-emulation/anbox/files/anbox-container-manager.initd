@@ -1,0 +1,13 @@
+#!/sbin/openrc-run
+# Copyright 1999-2019 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+
+description="Anbox Container Manager"
+
+#depend() {
+#}
+
+command="${ANBOX_EXEC:-/usr/bin/anbox}"
+command_args="container-manager --daemon ${ANBOX_OPTIONS} --data-path=${ANBOX_DATA_PATH:-/var/lib/anbox}"
+command_background="true"
+pidfile="/run/${RC_SVCNAME}.pid"

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<!-- maintainer-needed -->
+	<longdescription>
+POCO, the C++ Portable Components, is a collection of open source
+C++ class libraries that simplify and accelerate the development of
+network-centric, portable applications in C++. The libraries integrate
+perfectly with the C++ Standard Library and fill many of the functional
+gaps left open by it. Their modular and efficient design and implementation
+makes the C++ Portable Components extremely well suited for embedded
+development, an area where the C++ programming language is becoming
+increasingly popular, due to its suitability for both low-level (device
+I/O, interrupt handlers, etc.) and high-level object-oriented development.
+Of course, POCO is also ready for enterprise-level challenges.
+
+The POCO libraries free developers from re-inventing the wheel, and allow
+them to spend their time on more worthwhile areas, such as getting things
+done quickly and working on the features that make their application unique.
+	</longdescription>
+	<upstream>
+		<remote-id type="sourceforge">poco</remote-id>
+		<remote-id type="github">pocoproject/poco</remote-id>
+	</upstream>
+	<use>
+		<flag name="7zip">Add support for the 7z archive format</flag>
+		<flag name="cppparser">Install a minimal C++ parser library</flag>
+		<flag name="crypto">Encryption and digital signing classes</flag>
+		<flag name="data">Database abstraction layer to easily send/retrieve data to/from various databases</flag>
+		<flag name="encodings">Install Encodings library for character encodings</flag>
+		<flag name="encodings_compiler">Install tec, the POCO C++ Text Encodings Compiler</flag>
+		<flag name="file2pagecompiler">Install f2cpsp, a tool to create a PageCompiler source file from a binary file</flag>
+		<flag name="json">Add JSON support</flag>
+		<flag name="jwt">Add JSON Web Tokens support</flag>
+		<flag name="mariadb">Prefer <pkg>dev-db/mariadb-connector-c</pkg> over <pkg>dev-db/mysql-connector-c</pkg></flag>
+		<flag name="mongodb">Add <pkg>dev-db/mongodb</pkg> support</flag>
+		<flag name="net">Classes to write network clients &amp; servers</flag>
+		<flag name="pagecompiler">Install cpspc, a program that compiles web pages containing embedded C++ code into a C++ class
+			that can be used with the HTTP server from the POCO Net library</flag>
+		<flag name="pocodoc">POCO documentation generator</flag>
+		<flag name="utils">Several utility classes (like logger, timer, config file parser)</flag>
+		<flag name="redis">Add support for redis, an open source (BSD licensed), in-memory data structure store, used as a database, cache and message broker</flag>
+	</use>
+</pkgmetadata>

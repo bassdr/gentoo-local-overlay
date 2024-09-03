@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>floppym@gentoo.org</email>
+		<name>Mike Gilbert</name>
+	</maintainer>
+	<use>
+		<flag name="aad">Enable login via Azure AD</flag>
+		<flag name="client">Build client binaries</flag>
+		<flag name="faac">Enable feature FAAC for codec</flag>
+		<flag name="faad">Enable feature FAAD2 for codec</flag>
+		<flag name="fuse">Clipboard with FUSE file copy support</flag>
+		<flag name="openh264">Enable H.264 support using <pkg>media-libs/openh264</pkg></flag>
+		<flag name="server">Build server binaries</flag>
+		<flag name="soxr">Enable feature soxr for codec</flag>
+		<flag name="webengine">Enable aad authentification using <pkg>dev-qt/qtwebengine</pkg></flag>
+		<flag name="webview">Enable aad authentification using <pkg>net-libs/webkit-gtk</pkg></flag>
+	</use>
+	<upstream>
+		<remote-id type="github">FreeRDP/FreeRDP</remote-id>
+	</upstream>
+</pkgmetadata>

@@ -1,0 +1,167 @@
+diff --git a/libfreerdp/codec/dsp.c b/libfreerdp/codec/dsp.c
+index a291ee687..b2407f9e9 100644
+--- a/libfreerdp/codec/dsp.c
++++ b/libfreerdp/codec/dsp.c
+@@ -1238,12 +1238,11 @@ BOOL freerdp_dsp_encode(FREERDP_DSP_CONTEXT* WINPR_RESTRICT context,
+                         const BYTE* WINPR_RESTRICT data, size_t length, wStream* WINPR_RESTRICT out)
+ {
+ #if defined(WITH_FDK_AAC)
+-	FREERDP_DSP_COMMON_CONTEXT* ctx = (FREERDP_DSP_COMMON_CONTEXT*)context;
+-	WINPR_ASSERT(ctx);
+-	switch (ctx->format.wFormatTag)
++	WINPR_ASSERT(context);
++	switch (context->common.format.wFormatTag)
+ 	{
+ 		case WAVE_FORMAT_AAC_MS:
+-			return fdk_aac_dsp_encode(ctx, srcFormat, data, length, out);
++			return fdk_aac_dsp_encode(&context->common, srcFormat, data, length, out);
+ 		default:
+ 			break;
+ 	}
+@@ -1316,12 +1315,11 @@ BOOL freerdp_dsp_decode(FREERDP_DSP_CONTEXT* WINPR_RESTRICT context,
+                         const BYTE* WINPR_RESTRICT data, size_t length, wStream* WINPR_RESTRICT out)
+ {
+ #if defined(WITH_FDK_AAC)
+-	FREERDP_DSP_COMMON_CONTEXT* ctx = (FREERDP_DSP_COMMON_CONTEXT*)context;
+-	WINPR_ASSERT(ctx);
+-	switch (ctx->format.wFormatTag)
++	WINPR_ASSERT(context);
++	switch (context->common.format.wFormatTag)
+ 	{
+ 		case WAVE_FORMAT_AAC_MS:
+-			return fdk_aac_dsp_decode(ctx, srcFormat, data, length, out);
++			return fdk_aac_dsp_decode(&context->common, srcFormat, data, length, out);
+ 		default:
+ 			break;
+ 	}
+@@ -1460,10 +1458,9 @@ BOOL freerdp_dsp_context_reset(FREERDP_DSP_CONTEXT* WINPR_RESTRICT context,
+ 	WINPR_ASSERT(targetFormat);
+ 	if (targetFormat->wFormatTag == WAVE_FORMAT_AAC_MS)
+ 	{
+-		FREERDP_DSP_COMMON_CONTEXT* ctx = (FREERDP_DSP_COMMON_CONTEXT*)context;
+-		fdk_aac_dsp_uninit(ctx);
+-		ctx->format = *targetFormat;
+-		return fdk_aac_dsp_init(ctx, FramesPerPacket);
++		fdk_aac_dsp_uninit(&context->common);
++		context->common.format = *targetFormat;
++		return fdk_aac_dsp_init(&context->common, FramesPerPacket);
+ 	}
+ #endif
+ 
+@@ -1530,7 +1527,7 @@ BOOL freerdp_dsp_context_reset(FREERDP_DSP_CONTEXT* WINPR_RESTRICT context,
+ #endif
+ #if defined(WITH_FAAC)
+ 
+-	if (context->encoder)
++	if (context->common.encoder)
+ 	{
+ 		faacEncConfigurationPtr cfg;
+ 
+diff --git a/libfreerdp/codec/dsp_ffmpeg.c b/libfreerdp/codec/dsp_ffmpeg.c
+index 284a465bb..001d75b10 100644
+--- a/libfreerdp/codec/dsp_ffmpeg.c
++++ b/libfreerdp/codec/dsp_ffmpeg.c
+@@ -18,48 +18,11 @@
+  * limitations under the License.
+  */
+ 
+-#include <freerdp/config.h>
+-
+-#include <freerdp/log.h>
+-
+-#include <libavcodec/avcodec.h>
+-#include <libavutil/avutil.h>
+-#include <libavutil/opt.h>
+-#if defined(SWRESAMPLE_FOUND)
+-#include <libswresample/swresample.h>
+-#elif defined(AVRESAMPLE_FOUND)
+-#include <libavresample/avresample.h>
+-#else
+-#error "libswresample or libavresample required"
+-#endif
+-
+ #include "dsp.h"
+ #include "dsp_ffmpeg.h"
+ 
+ #define TAG FREERDP_TAG("dsp.ffmpeg")
+ 
+-struct S_FREERDP_DSP_CONTEXT
+-{
+-	FREERDP_DSP_COMMON_CONTEXT common;
+-
+-	BOOL isOpen;
+-
+-	UINT32 bufferedSamples;
+-
+-	enum AVCodecID id;
+-	const AVCodec* codec;
+-	AVCodecContext* context;
+-	AVFrame* frame;
+-	AVFrame* resampled;
+-	AVFrame* buffered;
+-	AVPacket* packet;
+-#if defined(SWRESAMPLE_FOUND)
+-	SwrContext* rcontext;
+-#else
+-	AVAudioResampleContext* rcontext;
+-#endif
+-};
+-
+ static BOOL ffmpeg_codec_is_filtered(enum AVCodecID id, BOOL encoder)
+ {
+ 	switch (id)
+diff --git a/libfreerdp/codec/dsp_ffmpeg.h b/libfreerdp/codec/dsp_ffmpeg.h
+index 973e3716e..5af4efe6d 100644
+--- a/libfreerdp/codec/dsp_ffmpeg.h
++++ b/libfreerdp/codec/dsp_ffmpeg.h
+@@ -24,6 +24,19 @@
+ #include <freerdp/api.h>
+ #include <freerdp/codec/audio.h>
+ #include <freerdp/codec/dsp.h>
++#include <freerdp/config.h>
++#include <freerdp/log.h>
++
++#include <libavcodec/avcodec.h>
++#include <libavutil/avutil.h>
++#include <libavutil/opt.h>
++#if defined(SWRESAMPLE_FOUND)
++#include <libswresample/swresample.h>
++#elif defined(AVRESAMPLE_FOUND)
++#include <libavresample/avresample.h>
++#else
++#error "libswresample or libavresample required"
++#endif
+ 
+ #include <libavcodec/version.h>
+ 
+@@ -45,4 +58,30 @@ BOOL freerdp_dsp_ffmpeg_decode(FREERDP_DSP_CONTEXT* context, const AUDIO_FORMAT*
+ BOOL freerdp_dsp_ffmpeg_context_reset(FREERDP_DSP_CONTEXT* context,
+                                       const AUDIO_FORMAT* targetFormat);
+ 
++#if defined(WITH_DSP_FFMPEG)
++
++struct S_FREERDP_DSP_CONTEXT
++{
++	FREERDP_DSP_COMMON_CONTEXT common;
++
++	BOOL isOpen;
++
++	UINT32 bufferedSamples;
++
++	enum AVCodecID id;
++	const AVCodec* codec;
++	AVCodecContext* context;
++	AVFrame* frame;
++	AVFrame* resampled;
++	AVFrame* buffered;
++	AVPacket* packet;
++#if defined(SWRESAMPLE_FOUND)
++	SwrContext* rcontext;
++#else
++	AVAudioResampleContext* rcontext;
++#endif
++};
++
++#endif /* WITH_DSP_FFMPEG */
++
+ #endif /* FREERDP_LIB_CODEC_DSP_FFMPEG_H */
