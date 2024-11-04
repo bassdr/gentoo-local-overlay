@@ -17,7 +17,7 @@ else
 	S="${WORKDIR}/${MY_P}"
 	SRC_URI="https://pub.freerdp.com/releases/${MY_P}.tar.gz
 		verify-sig? ( https://pub.freerdp.com/releases/${MY_P}.tar.gz.asc )"
-	KEYWORDS="~alpha amd64 ~arm arm64 ~loong ppc ppc64 ~riscv x86"
+	KEYWORDS="~alpha amd64 ~arm arm64 ~loong ~ppc ppc64 ~riscv x86"
 	BDEPEND="verify-sig? ( sec-keys/openpgp-keys-akallabeth )"
 	VERIFY_SIG_OPENPGP_KEY_PATH="/usr/share/openpgp-keys/akallabeth.asc"
 fi
@@ -129,17 +129,35 @@ option() {
 	usex "$1" ON OFF
 }
 
+option_client() {
+	if use client; then
+		option "$1"
+	else
+		echo OFF
+	fi
+}
+
+run_for_testing() {
+	if use test; then
+		local BUILD_DIR="${WORKDIR}/${P}_testing"
+		"$@"
+	fi
+}
+
 src_configure() {
 	# bug #881695
 	filter-lto
+	freerdp_configure -DBUILD_TESTING=OFF
+	run_for_testing freerdp_configure -DBUILD_TESTING=ON
+}
 
+freerdp_configure() {
 	local mycmakeargs=(
 		-Wno-dev
 
 		# https://bugs.gentoo.org/927037
 		-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
 
-		-DBUILD_TESTING=$(option test)
 		-DCHANNEL_URBDRC=$(option usb)
 		-DWITH_AAD=$(option aad)
 		-DWITH_ALSA=$(option alsa)
@@ -185,19 +203,26 @@ src_configure() {
 		-DWITH_X11=$(option X)
 		-DWITH_XINERAMA=$(option xinerama)
 		-DWITH_XV=$(option xv)
-		-DWITH_WAYLAND=$(option wayland)
+		-DWITH_WAYLAND=$(option_client wayland)
 		-DWITH_WEBVIEW=$(if use webview || use webengine ; then echo ON ; else echo OFF ; fi)
 		-DWITH_WEBVIEW_QT=$(option !qt6)
 		-DWITH_WEBVIEW_QT6=$(option qt6)
 		-DWITH_WINPR_TOOLS=$(option server)
+
+		"$@"
 	)
 	cmake_src_configure
+}
+
+src_compile() {
+	cmake_src_compile
+	run_for_testing cmake_src_compile
 }
 
 src_test() {
 	local myctestargs=( -E TestBacktrace )
 	has network-sandbox ${FEATURES} && myctestargs+=( -E TestConnect )
-	cmake_src_test
+	run_for_testing cmake_src_test
 }
 
 src_install() {
