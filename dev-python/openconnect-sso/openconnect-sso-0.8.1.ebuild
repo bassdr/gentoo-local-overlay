@@ -31,9 +31,9 @@ RDEPEND="
 	dev-python/requests[${PYTHON_USEDEP}]
 	dev-python/structlog[${PYTHON_USEDEP}]
 	dev-python/setuptools[${PYTHON_USEDEP}]
-	dev-python/PyQt6[${PYTHON_USEDEP},webchannel]
-	dev-python/PyQt6-WebEngine[${PYTHON_USEDEP}]
-	dev-python/PySocks[${PYTHON_USEDEP}]
+	dev-python/pyqt6[${PYTHON_USEDEP},webchannel]
+	dev-python/pyqt6-webengine[${PYTHON_USEDEP}]
+	dev-python/pysocks[${PYTHON_USEDEP}]
 "
 
 PATCHES=(
