@@ -3,7 +3,6 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(diff:*)",
-      "Bash(rm:*)"
     ]
   }
 }
