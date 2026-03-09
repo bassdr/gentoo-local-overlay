@@ -1,0 +1,24 @@
+#!/sbin/openrc-run
+# Copyright 1999-2025 Gentoo Authors
+# Distributed under the terms of the GNU General Public License, v2 or later
+#
+# System-wide WirePlumber session manager for OpenRC.
+# Connects to the system PipeWire instance at PIPEWIRE_RUNTIME_DIR.
+#
+# Configuration: /etc/conf.d/wireplumber-system
+
+: "${PIPEWIRE_USER:=pipewire}"
+: "${PIPEWIRE_GROUP:=pipewire}"
+: "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
+
+export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
+
+supervisor=supervise-daemon
+command="/usr/bin/wireplumber"
+command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
+pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-wireplumber.pid"
+
+depend() {
+	need pipewire-system dbus udev
+	after elogind
+}

@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+# Copyright 1999-2025 Gentoo Authors
+# Distributed under the terms of the GNU General Public License, v2 or later
+#
+# System-wide PipeWire daemon for OpenRC.
+# Runs as the 'pipewire' system user without requiring a user login session.
+# Pair with wireplumber-system for device management.
+#
+# Configuration: /etc/conf.d/pipewire-system
+
+: "${PIPEWIRE_USER:=pipewire}"
+: "${PIPEWIRE_GROUP:=pipewire}"
+: "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
+
+export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
+
+supervisor=supervise-daemon
+command="/usr/bin/pipewire"
+command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
+pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-pipewire.pid"
+
+depend() {
+	need dbus udev
+	after elogind
+}
+
+start_pre() {
+	checkpath -d -o "${PIPEWIRE_USER}:${PIPEWIRE_GROUP}" -m 0755 "${PIPEWIRE_RUNTIME_DIR}"
+}
