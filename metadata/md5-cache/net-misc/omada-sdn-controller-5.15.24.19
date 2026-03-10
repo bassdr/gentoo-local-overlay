@@ -1,0 +1,13 @@
+DEFINED_PHASES=preinst prepare setup
+DEPEND=>=dev-java/java-config-2.2.0-r3
+DESCRIPTION=TP-Link Omada SDN Controller
+EAPI=8
+HOMEPAGE=https://www.omadanetworks.com
+INHERIT=java-pkg-2
+KEYWORDS=amd64 arm64
+LICENSE=proprietary
+RDEPEND=dev-java/commons-daemon dev-db/mongodb net-misc/curl >=dev-java/java-config-2.2.0-r3
+SLOT=0
+SRC_URI=https://static.tp-link.com/upload/software/2025/202508/20250802/Omada_SDN_Controller_v5.15.24.19_linux_x64_20250724152611.tar.gz -> omada-sdn-controller-5.15.24.19.tar.gz
+_eclasses_=java-pkg-2	438c2725ea326202d7fc1eb31af76813	java-utils-2	b41327d85d12ce816943cf4d344add19
+_md5_=9e976c0f14c56313ac432163b52ac6ea

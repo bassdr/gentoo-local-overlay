@@ -1,0 +1,16 @@
+BDEPEND=sys-devel/gnuconfig >=app-portage/elt-patches-20250306 || ( >=dev-build/automake-1.18:1.18 >=dev-build/automake-1.17-r1:1.17 ) || ( >=dev-build/autoconf-2.72-r1:2.72 ) >=dev-build/libtool-2.4.7-r3
+DEFINED_PHASES=configure postinst prepare
+DEPEND=acct-user/nqptp acct-group/nqptp
+DESCRIPTION=nqptp is a daemon that monitors timing data from any PTP clocks
+EAPI=8
+HOMEPAGE=https://github.com/mikebrady/nqptp
+IDEPEND=filecaps? ( sys-libs/libcap )
+INHERIT=autotools fcaps
+IUSE=systemd +filecaps
+KEYWORDS=arm64
+LICENSE=GPL-2.0
+RDEPEND=acct-user/nqptp acct-group/nqptp
+SLOT=0
+SRC_URI=https://github.com/mikebrady/nqptp/archive/1.2.4.tar.gz -> nqptp-1.2.4.tar.gz
+_eclasses_=autotools	3a740b2e55e60a60e8c0c411f3996dfa	fcaps	c94316d02a37fb5cbe79b7d41c729119	gnuconfig	b4fa4889c6f586d6b069215a86dd9e53	libtool	6a96cd90e5da8c7c615015479f46f1a4	toolchain-funcs	8a2c298bde71ecf3f452dd9e67c94369
+_md5_=00f6673274dc3fe22e21b1985958f2c1

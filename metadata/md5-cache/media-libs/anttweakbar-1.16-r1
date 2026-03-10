@@ -1,0 +1,9 @@
+DEFINED_PHASES=compile install unpack
+DESCRIPTION=A library that adds an easy GUI into OpenGL applications to interactively tweak them on-screen
+EAPI=4
+HOMEPAGE=http://www.antisphere.com/Wiki/tools:anttweakbar?sb=tools
+KEYWORDS=~x86 ~amd64
+LICENSE=ZLIB
+SLOT=0
+SRC_URI=http://freefr.dl.sourceforge.net/project/anttweakbar/AntTweakBar_116.zip -> anttweakbar-1.16.zip
+_md5_=7c5fe5e248a5674f35057573dede918d
