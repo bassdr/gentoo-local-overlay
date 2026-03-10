@@ -28,7 +28,6 @@ Packages not available in the main Gentoo tree.
 | `dev-java/jargs` | Java CLI argument parsing library |
 | `dev-java/yuicompressor` | YUI CSS/JS compressor |
 | `sys-apps/emerge-update` | Helper script for Portage system updates |
-| `www-client/qupzilla` | Lightweight Qt web browser |
 
 ## Usage
 
