@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(ls:*)",
-      "Bash(diff:*)",
+      "Bash(diff:*)"
     ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bash /var/db/repos/bassdr/.claude/statusline-command.sh"
   }
 }

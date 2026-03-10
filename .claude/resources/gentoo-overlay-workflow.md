@@ -6,6 +6,13 @@
 - This overlay: `/var/db/repos/bassdr`
 - `metadata/layout.conf`: `masters = gentoo` — inherits all categories/eclasses from gentoo
 
+## Required files per package
+
+Every package directory needs:
+- `<pkg>-<ver>.ebuild` — the ebuild itself
+- `metadata.xml` — maintainer, upstream links, USE flag descriptions (missing this causes a fatal error at install)
+- `Manifest` — generated via `ebuild ... manifest`, never edit manually
+
 ## When adding or updating a package
 
 1. Check if it exists in `/var/db/repos/gentoo` first (search by package name across categories):
