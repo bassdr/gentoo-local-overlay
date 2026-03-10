@@ -106,7 +106,7 @@ RDEPEND="
 	bluetooth? (
 		dev-libs/glib
 		media-libs/fdk-aac
-		media-libs/liblc3
+		media-sound/liblc3
 		media-libs/libldac
 		media-libs/libfreeaptx
 		media-libs/opus
@@ -344,6 +344,9 @@ multilib_src_install_all() {
 			# creates /run/pipewire in start_pre via checkpath.
 			exeinto /etc/init.d
 			newexe "${FILESDIR}"/pipewire-system.initd pipewire-system
+			if use sound-server; then
+				newexe "${FILESDIR}"/pipewire-pulse-system.initd pipewire-pulse-system
+			fi
 		fi
 	fi
 
@@ -468,6 +471,9 @@ pkg_postinst() {
 			elog
 			elog "Enable with:"
 			elog "  rc-update add pipewire-system default"
+			if use sound-server; then
+				elog "  rc-update add pipewire-pulse-system default"
+			fi
 			elog "  rc-update add wireplumber-system default  (from media-video/wireplumber)"
 			elog
 			elog "gentoo-pipewire-launcher and pipewire.desktop autostart are NOT installed"

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>sam@gentoo.org</email>
+		<name>Sam James</name>
+	</maintainer>
+	<longdescription>
+		Fork of media-video/pipewire from the gentoo tree.
+		Removes the systemd hard-dependency from the system-service USE flag,
+		allowing it to install an OpenRC system init script instead.
+		When system-service is enabled on OpenRC, gentoo-pipewire-launcher and
+		the XDG autostart entry are not installed (see bug #964059), and
+		/etc/profile.d/pipewire-system.sh sets PIPEWIRE_RUNTIME_DIR=/run/pipewire
+		so user sessions connect to the system socket.
+	</longdescription>
+	<upstream>
+		<bugs-to>https://gitlab.freedesktop.org/pipewire/pipewire/-/issues</bugs-to>
+		<changelog>https://gitlab.freedesktop.org/pipewire/pipewire/-/releases</changelog>
+		<remote-id type="freedesktop-gitlab">pipewire/pipewire</remote-id>
+	</upstream>
+	<use>
+		<flag name="system-service">Install OpenRC system init script (on OpenRC) or systemd unit files (on systemd) for running as a system-wide service using acct-user/pipewire. On OpenRC, skips gentoo-pipewire-launcher to avoid duplicate instances (bug #964059).</flag>
+	</use>
+</pkgmetadata>

@@ -1,0 +1,33 @@
+#!/sbin/openrc-run
+# Copyright 1999-2025 Gentoo Authors
+# Distributed under the terms of the GNU General Public License, v2 or later
+#
+# System-wide PipeWire PulseAudio compatibility daemon for OpenRC.
+# Creates /run/pipewire/pulse/native for PulseAudio clients.
+
+: "${PIPEWIRE_USER:=pipewire}"
+: "${PIPEWIRE_GROUP:=pipewire}"
+: "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
+
+export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
+
+supervisor=supervise-daemon
+command="/usr/bin/pipewire"
+command_args="-c pipewire-pulse.conf"
+command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
+pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-pipewire-pulse.pid"
+
+depend() {
+	need pipewire-system
+}
+
+start_post() {
+	# PipeWire creates pulse/ as 0700; open it to the pipewire group
+	# so users in that group can connect via PULSE_SERVER.
+	local i=0
+	while [ $i -lt 10 ] && [ ! -S "${PIPEWIRE_RUNTIME_DIR}/pulse/native" ]; do
+		sleep 0.2
+		i=$(( i + 1 ))
+	done
+	chmod 750 "${PIPEWIRE_RUNTIME_DIR}/pulse" 2>/dev/null || true
+}
