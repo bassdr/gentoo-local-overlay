@@ -27,3 +27,15 @@ depend() {
 start_pre() {
 	checkpath -d -o "${PIPEWIRE_USER}:${PIPEWIRE_GROUP}" -m 0755 "${PIPEWIRE_RUNTIME_DIR}"
 }
+
+start_post() {
+	# PipeWire creates its sockets as 0755; open them to the pipewire group
+	# so users in that group can connect (Unix sockets require write access).
+	local i=0
+	while [ $i -lt 10 ] && [ ! -S "${PIPEWIRE_RUNTIME_DIR}/pipewire-0" ]; do
+		sleep 0.2
+		i=$(( i + 1 ))
+	done
+	chmod 0770 "${PIPEWIRE_RUNTIME_DIR}"/pipewire-0 \
+	           "${PIPEWIRE_RUNTIME_DIR}"/pipewire-0-manager 2>/dev/null || true
+}

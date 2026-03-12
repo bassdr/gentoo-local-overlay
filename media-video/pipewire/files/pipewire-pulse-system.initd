@@ -18,7 +18,7 @@ command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
 pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-pipewire-pulse.pid"
 
 depend() {
-	need pipewire-system
+	need wireplumber-system
 }
 
 start_post() {

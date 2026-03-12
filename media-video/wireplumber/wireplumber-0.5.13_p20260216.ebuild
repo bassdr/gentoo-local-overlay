@@ -14,11 +14,18 @@ EAPI=8
 # continue to move quickly. It's not uncommon for fixes to be made shortly
 # after releases.
 
+# TODO: Maybe get upstream to produce `meson dist` tarballs:
+# - https://gitlab.freedesktop.org/wireplumber/wireplumber/-/issues/3663
+# - https://gitlab.freedesktop.org/wireplumber/wireplumber/-/merge_requests/1788
+#
 # Generate using https://github.com/thesamesam/sam-gentoo-scripts/blob/main/niche/generate-wireplumber-docs
+# Set to 1 if prebuilt, 0 if not
+# (the construct below is to allow overriding from env for script)
 : ${WIREPLUMBER_DOCS_PREBUILT:=1}
 
 WIREPLUMBER_DOCS_PREBUILT_DEV=sam
 WIREPLUMBER_DOCS_VERSION="$(ver_cut 1-3)"
+# Default to generating docs (inc. man pages) if no prebuilt; overridden later
 WIREPLUMBER_DOCS_USEFLAG="+doc"
 
 LUA_COMPAT=( lua5-{3,4} )
@@ -34,7 +41,13 @@ if [[ ${PV} == 9999 ]]; then
 	EGIT_BRANCH="master"
 	inherit git-r3
 else
-	SRC_URI="https://gitlab.freedesktop.org/pipewire/${PN}/-/archive/${PV}/${P}.tar.bz2"
+	if [[ ${PV} == *_p* ]] ; then
+		WIREPLUMBER_COMMIT="83d08dfa437095373f9e4e156b6ca4f9e0567585"
+		SRC_URI="https://gitlab.freedesktop.org/pipewire/wireplumber/-/archive/${WIREPLUMBER_COMMIT}/wireplumber-${WIREPLUMBER_COMMIT}.tar.bz2"
+		S="${WORKDIR}"/${PN}-${WIREPLUMBER_COMMIT}
+	else
+		SRC_URI="https://gitlab.freedesktop.org/pipewire/${PN}/-/archive/${PV}/${P}.tar.bz2"
+	fi
 
 	if [[ ${WIREPLUMBER_DOCS_PREBUILT} == 1 ]] ; then
 		SRC_URI+=" !doc? ( https://dev.gentoo.org/~${WIREPLUMBER_DOCS_PREBUILT_DEV}/distfiles/${CATEGORY}/${PN}/${PN}-${WIREPLUMBER_DOCS_VERSION}-docs.tar.xz )"
@@ -57,6 +70,7 @@ REQUIRED_USE="
 
 RESTRICT="!test? ( test )"
 
+# introspection? ( >=dev-libs/gobject-introspection-1.82.0-r2 ) is valid but likely only used for doc building
 BDEPEND="
 	${PYTHON_DEPS}
 	dev-libs/glib
@@ -91,6 +105,9 @@ RDEPEND="
 DOCS=( {NEWS,README}.rst )
 
 PATCHES=(
+	# Defer enabling sound server parts to media-video/pipewire
+	# TODO: Soon, we should be able to migrate to just a dropin at
+	# /usr/share. See https://gitlab.freedesktop.org/pipewire/wireplumber/-/issues/652#note_2399735.
 	"${FILESDIR}"/${PN}-0.5.6-config-disable-sound-server-parts.patch
 )
 
@@ -116,6 +133,7 @@ src_configure() {
 		-Dtools=true
 		-Dmodules=true
 		$(meson_feature doc)
+		# Only used for Sphinx doc generation
 		-Dintrospection=disabled
 		-Dsystem-lua=true
 		-Dsystem-lua-version=$(ver_cut 1-2 $(lua_get_version))
@@ -159,8 +177,12 @@ pkg_postinst() {
 	if use system-service; then
 		if use systemd; then
 			ewarn
-			ewarn "WARNING: system-service with systemd installs system-wide systemd units."
-			ewarn "This is likely NOT what you want. Use systemd user units instead."
+			ewarn "WARNING: you have enabled the system-service USE flag, which installs"
+			ewarn "the system-wide systemd units that enable WirePlumber to run as a system"
+			ewarn "service. This is more than likely NOT what you want. You are strongly"
+			ewarn "advised not to enable this mode and instead stick with systemd user"
+			ewarn "units. The default configuration files will likely not work out of"
+			ewarn "box, and you are on your own with configuration."
 			ewarn
 		else
 			elog
@@ -169,9 +191,10 @@ pkg_postinst() {
 			elog
 			elog "Enable with:"
 			elog "  rc-update add wireplumber-system default"
+			elog "  (this pulls in pipewire-system automatically)"
 			elog
-			elog "Requires media-video/pipewire[system-service] and"
-			elog "  rc-update add pipewire-system default"
+			elog "For PulseAudio client compatibility, also enable from media-video/pipewire:"
+			elog "  rc-update add pipewire-pulse-system default"
 			elog
 		fi
 	fi
