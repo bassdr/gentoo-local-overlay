@@ -1,0 +1,27 @@
+#!/bin/sh
+# /usr/lib/udev/timidity-midi-connect
+# Triggered by udev when an ALSA MIDI device is added.
+# Connects all hardware MIDI output ports to the TiMidity system sequencer.
+
+PATH=/usr/bin:/bin
+
+# Give ALSA a moment to finish registering the new sequencer client.
+sleep 0.5
+
+# Locate TiMidity's input client number.
+# aconnect -li lists input (receiving) ports; TiMidity appears as a user client.
+timidity_client=$(aconnect -li 2>/dev/null | \
+	awk '/^client [0-9]+/ && /TiMidity/ { print $2 + 0; exit }')
+
+[ -z "${timidity_client}" ] && exit 0  # TiMidity is not running
+
+# Connect every hardware MIDI output port (type=kernel, skip built-in clients
+# 0=System and 14=Midi-Through) to TiMidity's first input port.
+#
+# aconnect -lo output format:
+#   client 24: 'USB MIDI Controller' [type=kernel,card=2]
+#       0 'USB MIDI Controller MIDI 1'
+aconnect -lo 2>/dev/null | awk -v tc="${timidity_client}" '
+	/^client [0-9]+.*\[type=kernel/ { c = $2 + 0 }
+	/^[[:space:]]+[0-9]/ && c > 14  { p = $1 + 0; system("aconnect " c ":" p " " tc ":0 2>/dev/null") }
+'

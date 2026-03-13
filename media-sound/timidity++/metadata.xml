@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="project">
+		<email>sound@gentoo.org</email>
+		<name>Gentoo Sound project</name>
+	</maintainer>
+	<use>
+		<flag name="system-service">
+			Install an OpenRC system-wide init script that runs TiMidity++ as
+			the 'timidity' system user, outputting via libao to the PipeWire
+			system pulse socket. Also installs udev rules to auto-connect MIDI
+			devices to the sequencer. Requires USE=alsa and USE=ao.
+			See also: media-video/pipewire[system-service].
+		</flag>
+	</use>
+	<upstream>
+		<remote-id type="sourceforge">timidity</remote-id>
+	</upstream>
+</pkgmetadata>

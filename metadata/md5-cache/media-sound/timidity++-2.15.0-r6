@@ -1,0 +1,17 @@
+BDEPEND=sys-devel/gnuconfig >=app-portage/elt-patches-20250306 || ( >=dev-build/automake-1.18:1.18 >=dev-build/automake-1.17-r1:1.17 ) || ( >=dev-build/autoconf-2.72-r1:2.72 ) >=dev-build/libtool-2.4.7-r3 virtual/pkgconfig virtual/pkgconfig
+DEFINED_PHASES=configure install postinst postrm preinst prepare
+DEPEND=alsa? ( media-libs/alsa-lib ) ao? ( >=media-libs/libao-0.8.5 ) emacs? ( >=app-editors/emacs-23.1:* ) flac? ( media-libs/flac:= ) gtk? ( x11-libs/gtk+:2 ) jack? ( virtual/jack ) motif? ( >=x11-libs/motif-2.3:0 ) nas? ( >=media-libs/nas-1.4 ) ncurses? ( sys-libs/ncurses:0= ) ogg? ( media-libs/libogg ) slang? ( sys-libs/slang ) speex? ( media-libs/speex ) tk? ( dev-lang/tk:= ) vorbis? ( media-libs/libvorbis ) X? ( media-libs/libpng:= x11-libs/libX11 x11-libs/libXext Xaw3d? ( x11-libs/libXaw3d ) !Xaw3d? ( x11-libs/libXaw ) ) dev-util/desktop-file-utils x11-misc/shared-mime-info
+DESCRIPTION=Handy MIDI to WAV converter with OSS and ALSA output support
+EAPI=7
+HOMEPAGE=https://timidity.sourceforge.net/
+INHERIT=autotools desktop elisp-common flag-o-matic systemd udev xdg
+IUSE=alsa ao emacs flac gtk jack motif nas ncurses ogg oss selinux slang speex system-service tk vorbis X Xaw3d
+KEYWORDS=~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86
+LICENSE=GPL-2+
+PDEPEND=|| ( media-sound/timidity-eawpatches media-sound/timidity-freepats )
+RDEPEND=alsa? ( media-libs/alsa-lib ) ao? ( >=media-libs/libao-0.8.5 ) emacs? ( >=app-editors/emacs-23.1:* ) flac? ( media-libs/flac:= ) gtk? ( x11-libs/gtk+:2 ) jack? ( virtual/jack ) motif? ( >=x11-libs/motif-2.3:0 ) nas? ( >=media-libs/nas-1.4 ) ncurses? ( sys-libs/ncurses:0= ) ogg? ( media-libs/libogg ) slang? ( sys-libs/slang ) speex? ( media-libs/speex ) tk? ( dev-lang/tk:= ) vorbis? ( media-libs/libvorbis ) X? ( media-libs/libpng:= x11-libs/libX11 x11-libs/libXext Xaw3d? ( x11-libs/libXaw3d ) !Xaw3d? ( x11-libs/libXaw ) ) app-eselect/eselect-timidity alsa? ( media-sound/alsa-utils ) selinux? ( sec-policy/selinux-timidity ) system-service? ( acct-group/audio acct-group/nobody >=acct-user/timidity-0-r3 >=media-video/pipewire-1.6.1-r1[system-service,sound-server] )
+REQUIRED_USE=tk? ( X ) system-service? ( alsa ao )
+SLOT=0
+SRC_URI=https://downloads.sourceforge.net/timidity/TiMidity++-2.15.0.tar.xz
+_eclasses_=gnuconfig	b4fa4889c6f586d6b069215a86dd9e53	toolchain-funcs	8a2c298bde71ecf3f452dd9e67c94369	libtool	6a96cd90e5da8c7c615015479f46f1a4	autotools	3a740b2e55e60a60e8c0c411f3996dfa	desktop	26d57169ca094c04be416993844ec8bc	elisp-common	0ea9a0d3bc26353e1642c73560a24fdf	flag-o-matic	ed1eda86c8f746a2a75f7f9f7478f5f4	systemd	a964c0cbe818b5729da1dbfcee5be861	udev	20c370aff0d0c108f3605c84b3f47084	xdg-utils	42869b3c8d86a70ef3cf75165a395e09	xdg	3ef49a87c52c8b77c476351195dfe575
+_md5_=b0c2fbecb3522217e79d2a158b697836

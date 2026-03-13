@@ -1,0 +1,4 @@
+# Automatically connect newly plugged USB MIDI devices to the TiMidity
+# system sequencer.  Triggers when ALSA registers a raw MIDI character device,
+# which happens for USB-MIDI class devices as well as hardware MIDI interfaces.
+SUBSYSTEM=="snd", KERNEL=="midi*", ACTION=="add", RUN+="/usr/lib/udev/timidity-midi-connect"

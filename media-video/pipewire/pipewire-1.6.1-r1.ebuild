@@ -185,7 +185,7 @@ RDEPEND="
 
 DEPEND="${RDEPEND}"
 
-PDEPEND=">=media-video/wireplumber-0.5.2"
+PDEPEND=">=media-video/wireplumber-0.5.13_p20260216-r1"
 
 # Present RDEPEND that are currently always disabled due to the PW
 # code using them being required to be disabled by Gentoo guidelines
@@ -412,7 +412,7 @@ multilib_src_install_all() {
 
 			doman "${FILESDIR}"/gentoo-pipewire-launcher.1
 
-      # Disable pipewire-pulse if sound-server is disabled.
+			# Disable pipewire-pulse if sound-server is disabled.
 			if ! use sound-server ; then
 				sed -i -s '/pipewire -c pipewire-pulse.conf/s/^/#/' "${ED}"/usr/bin/gentoo-pipewire-launcher || die
 			fi

@@ -5,6 +5,10 @@
 		<email>sam@gentoo.org</email>
 		<name>Sam James</name>
 	</maintainer>
+	<maintainer type="person">
+		<email>leio@gentoo.org</email>
+		<name>Mart Raudsepp</name>
+	</maintainer>
 	<longdescription>
 		Fork of media-video/pipewire from the gentoo tree.
 		Removes the systemd hard-dependency from the system-service USE flag,
@@ -17,9 +21,25 @@
 	<upstream>
 		<bugs-to>https://gitlab.freedesktop.org/pipewire/pipewire/-/issues</bugs-to>
 		<changelog>https://gitlab.freedesktop.org/pipewire/pipewire/-/releases</changelog>
+		<doc>https://gitlab.freedesktop.org/pipewire/pipewire/-/wikis/home</doc>
 		<remote-id type="freedesktop-gitlab">pipewire/pipewire</remote-id>
 	</upstream>
 	<use>
-		<flag name="system-service">Install OpenRC system init script (on OpenRC) or systemd unit files (on systemd) for running as a system-wide service using acct-user/pipewire. On OpenRC, skips gentoo-pipewire-launcher to avoid duplicate instances (bug #964059).</flag>
+		<flag name="echo-cancel">Enable WebRTC-based echo canceller via <pkg>media-libs/webrtc-audio-processing</pkg></flag>
+		<flag name="extra">Build pw-cat/pw-play/pw-record</flag>
+		<flag name="flatpak">Enable Flatpak support</flag>
+		<flag name="gsettings">Use gsettings (<pkg>dev-libs/glib</pkg>) to read/save used modules (useful for e.g. <pkg>media-sound/paprefs</pkg></flag>
+		<flag name="jack-client">Install a plugin for running PipeWire as a JACK client</flag>
+		<flag name="jack-sdk">Use PipeWire as JACK replacement</flag>
+		<flag name="libcamera">Enable libcamera plugin via <pkg>media-libs/libcamera</pkg></flag>
+		<flag name="loudness">Enable loudness normalisation according to the EBU R128 standard using <pkg>media-libs/libebur128</pkg></flag>
+		<flag name="lv2">Allow loading LV2 plugins via <pkg>media-libs/lv2</pkg></flag>
+		<flag name="modemmanager">Combined with USE=bluetooth, allows PipeWire to perform telephony on mobile devices.</flag>
+		<flag name="pipewire-alsa">Install ALSA plugin, similar to <pkg>media-plugins/alsa-plugins</pkg>'s USE=pulseaudio.</flag>
+		<flag name="roc">Enable roc support for real-time audio streaming over the network, using <pkg>media-libs/roc-toolkit</pkg>.</flag>
+		<flag name="sound-server">Provide sound server using ALSA and bluetooth devices</flag>
+		<flag name="ssl">Enable raop-sink support (needs <pkg>dev-libs/openssl</pkg>)</flag>
+		<flag name="system-service">On OpenRC: install /etc/init.d/pipewire-system running as acct-user/pipewire, without systemd hard-dependency. On systemd: install systemd system unit files (not recommended).</flag>
+		<flag name="X">Enable audible bell for X11</flag>
 	</use>
 </pkgmetadata>
