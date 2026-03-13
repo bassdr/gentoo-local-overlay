@@ -1,17 +1,17 @@
 # /etc/conf.d/timidity
-# Configuration for the system-wide TiMidity++ ALSA MIDI sequencer.
-# The daemon is always started with -iA (ALSA sequencer server mode).
-# TIMIDITY_OPTS are appended to that.
+# Configuration for the system-wide TiMidity++ MIDI sequencer.
+# TIMIDITY_OPTS are appended to the interface mode set at emerge time.
 
-# Output driver (omit to use timidity's compiled-in default):
-#   -Os          : ALSA PCM direct output
-#   -OO          : libao (routes through PipeWire/PulseAudio — better for
-#                  system-wide PipeWire, but requires USE=ao at compile time)
-#
-# To use libao output with PipeWire, first enable the ao USE flag:
-#   echo "media-sound/timidity++ ao" >> /etc/portage/package.use/timidity
-#   emerge -1 media-sound/timidity++
-# then change TIMIDITY_OPTS below to "-OO -EFreverb=0".
+# Interface mode (set by the ebuild based on USE flags):
+#   -iA          : ALSA sequencer (default without USE=pipewire)
+#   -ip          : PipeWire MIDI synthesizer (default with USE=pipewire)
+# Override by setting TIMIDITY_INTERFACE below.
+#TIMIDITY_INTERFACE="-iA"
+
+# Output driver:
+#   -Os          : ALSA PCM direct output (default without USE=pipewire)
+#   -OW          : PipeWire native output (default with USE=pipewire)
+#   -OO          : libao (routes through PipeWire/PulseAudio, requires USE=ao)
 #
 # Common options:
 #   -B<n>,<m>    : buffer fragments(n) and size 2^m (e.g. -B2,8)
@@ -23,4 +23,3 @@ TIMIDITY_OPTS="-B2,8 -EFreverb=0"
 # PipeWire system socket location (default: /run/pipewire).
 # Change this only if your system-wide PipeWire uses a non-standard path.
 #TIMIDITY_RUNTIME_DIR="/run/pipewire"
-

@@ -2,19 +2,21 @@
 # Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License, v2 or later
 #
-# System-wide TiMidity++ ALSA MIDI sequencer daemon for OpenRC.
+# System-wide TiMidity++ MIDI sequencer daemon for OpenRC.
 # Runs as acct-user/timidity (group audio).
-# When USE=ao and TIMIDITY_OPTS includes -OO, routes audio through PipeWire
-# via the system-wide PulseAudio socket.
+#
+# Interface mode (-iA or -ip) and output driver are set at emerge time
+# based on USE flags, then tunable via /etc/conf.d/timidity.
 #
 # Configuration: /etc/conf.d/timidity
 
 : "${TIMIDITY_USER:=timidity}"
 : "${TIMIDITY_RUNTIME_DIR:=/run/pipewire}"
+: "${TIMIDITY_INTERFACE:=-iA}"
 
 supervisor=supervise-daemon
 command="/usr/bin/timidity"
-command_args="-iA ${TIMIDITY_OPTS}"
+command_args="${TIMIDITY_INTERFACE} ${TIMIDITY_OPTS}"
 command_user="${TIMIDITY_USER}"
 pidfile="/run/timidity.pid"
 
@@ -44,12 +46,23 @@ start_pre() {
 		ok=0
 	fi
 
-	# Verify the ALSA sequencer device node exists
-	if [ ! -c /dev/snd/seq ]; then
+	# Verify the ALSA sequencer device node exists (needed for -iA mode)
+	if [ "${TIMIDITY_INTERFACE}" = "-iA" ] && [ ! -c /dev/snd/seq ]; then
 		eerror "/dev/snd/seq does not exist — is the snd-seq kernel module loaded?"
 		eerror "Try: modprobe snd-seq snd-seq-midi"
 		ok=0
 	fi
+
+	# When using PipeWire (-ip or -OW), check pipewire group membership
+	case "${TIMIDITY_INTERFACE}${TIMIDITY_OPTS}" in
+		*-ip*|*-OW*)
+			if ! id -nG "${TIMIDITY_USER}" 2>/dev/null | grep -qw pipewire; then
+				ewarn "User '${TIMIDITY_USER}' is not in the 'pipewire' group."
+				ewarn "PipeWire audio/MIDI may fail if the socket is group-restricted."
+				ewarn "Re-emerge acct-user/timidity to fix: emerge -1 acct-user/timidity"
+			fi
+			;;
+	esac
 
 	# When using libao (-OO), the timidity user needs the pipewire group
 	# to access the PipeWire socket (if it is group-restricted).
@@ -66,8 +79,8 @@ start_pre() {
 	[ "${ok}" -eq 1 ] || return 1
 
 	# Pass PipeWire socket location to the daemon explicitly.
-	# Needed when USE=ao / -OO: libao's PulseAudio backend has no login
-	# session and cannot discover XDG_RUNTIME_DIR on its own.
+	# The system service has no login session and cannot discover
+	# XDG_RUNTIME_DIR on its own.
 	supervise_daemon_args="--env PULSE_SERVER=unix:${TIMIDITY_RUNTIME_DIR}/pulse/native --env XDG_RUNTIME_DIR=${TIMIDITY_RUNTIME_DIR}"
 
 	# Ensure log file is writable (directory created by ebuild)

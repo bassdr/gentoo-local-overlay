@@ -1,11 +1,11 @@
 # Copyright 1999-2025 Gentoo Authors
 # Distributed under the terms of the GNU General Public License v2
 #
-# bassdr overlay: adds system-service USE flag for OpenRC system-wide MIDI
-# sequencer running as acct-user/timidity, outputting via libao to PipeWire.
-# Also installs udev rules to auto-connect MIDI devices to the sequencer.
+# bassdr overlay: uses bassdr/timidity fork with all patches pre-applied
+# and pipewire native support. Adds system-service USE flag for OpenRC
+# system-wide MIDI sequencer running as acct-user/timidity.
 
-EAPI=7
+EAPI=8
 
 inherit autotools desktop elisp-common flag-o-matic systemd udev xdg
 
@@ -13,18 +13,18 @@ MY_PV="${PV/_/-}"
 MY_P="TiMidity++-${MY_PV}"
 
 DESCRIPTION="Handy MIDI to WAV converter with OSS and ALSA output support"
-HOMEPAGE="https://timidity.sourceforge.net/"
-SRC_URI="https://downloads.sourceforge.net/timidity/${MY_P}.tar.xz"
-S="${WORKDIR}/${MY_P}"
+HOMEPAGE="https://github.com/bassdr/timidity"
+SRC_URI="https://github.com/bassdr/timidity/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+S="${WORKDIR}/timidity-${PV}"
 
 LICENSE="GPL-2+"
 SLOT="0"
 KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
-IUSE="alsa ao emacs flac gtk jack motif nas ncurses ogg oss selinux slang speex system-service tk vorbis X Xaw3d"
+IUSE="alsa ao emacs flac gtk jack motif nas ncurses ogg oss pipewire selinux slang speex system-service tk vorbis X Xaw3d"
 
 REQUIRED_USE="
 	tk? ( X )
-	system-service? ( alsa )
+	system-service? ( || ( alsa pipewire ) )
 "
 
 DEPEND="
@@ -38,6 +38,7 @@ DEPEND="
 	nas? ( >=media-libs/nas-1.4 )
 	ncurses? ( sys-libs/ncurses:0= )
 	ogg? ( media-libs/libogg )
+	pipewire? ( media-video/pipewire:= )
 	slang? ( sys-libs/slang )
 	speex? ( media-libs/speex )
 	tk? ( dev-lang/tk:= )
@@ -68,23 +69,10 @@ PDEPEND="|| ( media-sound/timidity-eawpatches media-sound/timidity-freepats )"
 
 SITEFILE=50${PN}-gentoo.el
 
-DOCS=( AUTHORS ChangeLog NEWS README "${FILESDIR}"/timidity.cfg-r1 )
-
-PATCHES=(
-	"${FILESDIR}"/${PN}-2.14.0-params.patch
-	"${FILESDIR}"/${PN}-2.14.0-ar.patch
-	"${FILESDIR}"/${PN}-2.14.0-configure-flags.patch
-	"${FILESDIR}"/${PN}-2.15.0-pkg-config.patch
-	"${FILESDIR}"/${PN}-2.14.0-CVE-2017-1154{6,7}.patch
-	"${FILESDIR}"/${PN}-2.15.0-lto-workaround.patch
-	"${FILESDIR}"/${PN}-2.15.0-clang-16-configure.patch
-)
+DOCS=( AUTHORS ChangeLog NEWS README.md "${FILESDIR}"/timidity.cfg-r1 )
 
 src_prepare() {
 	default
-
-	mv configure.{in,ac} || die
-
 	eautoreconf
 }
 
@@ -132,6 +120,7 @@ src_configure() {
 		$(use_enable tk tcltk)
 		$(use_enable motif)
 		$(use_with Xaw3d xawlib ${xaw_provider})
+		$(use_enable pipewire pipewiresyn)
 	)
 
 	use flac && audios+=",flac"
@@ -141,6 +130,7 @@ src_configure() {
 	use oss && audios+=",oss"
 	use jack && audios+=",jack"
 	use ao && audios+=",ao"
+	use pipewire && audios+=",pipewire"
 
 	if use nas; then
 		audios+=",nas"
@@ -182,6 +172,16 @@ src_install() {
 	if use system-service; then
 		newconfd "${FILESDIR}"/timidity.confd timidity
 		newinitd "${FILESDIR}"/timidity.initd timidity
+
+		if use pipewire; then
+			# Switch defaults to PipeWire: -ip interface, -OW output
+			sed -i \
+				-e 's/^: "${TIMIDITY_INTERFACE:=-iA}"/: "${TIMIDITY_INTERFACE:=-ip}"/' \
+				"${ED}"/etc/init.d/timidity || die
+			sed -i \
+				-e 's/^TIMIDITY_OPTS="-B2,8 -EFreverb=0"/TIMIDITY_OPTS="-OW -EFreverb=0"/' \
+				"${ED}"/etc/conf.d/timidity || die
+		fi
 
 		systemd_dounit "${FILESDIR}"/timidity.service
 
@@ -238,9 +238,11 @@ pkg_postinst() {
 
 	if use system-service; then
 		# Add timidity user to the pipewire group so it can access
-		# the PipeWire socket when using libao output (-OO).
-		if ! id -nG timidity 2>/dev/null | grep -qw pipewire; then
-			usermod -aG pipewire timidity || ewarn "Failed to add timidity to pipewire group"
+		# the PipeWire socket.
+		if use pipewire; then
+			if ! id -nG timidity 2>/dev/null | grep -qw pipewire; then
+				usermod -aG pipewire timidity || ewarn "Failed to add timidity to pipewire group"
+			fi
 		fi
 
 		elog
@@ -250,10 +252,15 @@ pkg_postinst() {
 		elog "Enable with:"
 		elog "  rc-update add timidity default"
 		elog
-		elog "Output defaults to timidity's compiled-in default. To route through"
-		elog "PipeWire, enable USE=ao and set TIMIDITY_OPTS=\"-OO -EFreverb=0\""
-		elog "in /etc/conf.d/timidity. If using PipeWire, the service will"
-		elog "automatically wait for pipewire-pulse-system to be up."
+		if use pipewire; then
+			elog "Output defaults to PipeWire native (-OW) with PipeWire MIDI (-ip)."
+			elog "To route through PulseAudio instead, enable USE=ao and set"
+			elog "TIMIDITY_OPTS=\"-OO -EFreverb=0\" in /etc/conf.d/timidity."
+		else
+			elog "Output defaults to ALSA (-Os) with ALSA sequencer (-iA)."
+			elog "To route through PipeWire, enable USE=ao and set"
+			elog "TIMIDITY_OPTS=\"-OO -EFreverb=0\" in /etc/conf.d/timidity."
+		fi
 		elog
 		elog "A udev rule has been installed to auto-connect USB MIDI devices to"
 		elog "the TiMidity sequencer when they are plugged in."
