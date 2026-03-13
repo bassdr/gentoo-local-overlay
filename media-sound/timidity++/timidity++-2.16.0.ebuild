@@ -56,13 +56,12 @@ RDEPEND="
 	${DEPEND}
 	app-eselect/eselect-timidity
 	alsa? ( media-sound/alsa-utils )
-	selinux? ( sec-policy/selinux-timidity )
-	system-service? (
-		acct-group/audio
+	pipewire? (
 		acct-group/pipewire
-		>=acct-user/timidity-0-r3
-		>=media-video/pipewire-1.6.1-r1[system-service,sound-server]
+		>=media-video/pipewire-1.6.1-r1[sound-server,system-service?]
 	)
+	selinux? ( sec-policy/selinux-timidity )
+	system-service? ( >=acct-user/timidity-0-r3 )
 "
 
 PDEPEND="|| ( media-sound/timidity-eawpatches media-sound/timidity-freepats )"
@@ -98,6 +97,17 @@ src_configure() {
 	# bug #943939
 	append-cflags -std=gnu17
 
+	use flac && audios+=",flac"
+	use speex && audios+=",speex"
+	use vorbis && audios+=",vorbis"
+	use ogg && audios+=",ogg"
+	use oss && audios+=",oss"
+	use jack && audios+=",jack"
+	use ao && audios+=",ao"
+	use alsa && audios+=",alsa"
+	use pipewire && audios+=",pipewire"
+	use nas && audios+=",nas"
+
 	local myeconfargs=(
 		--localstatedir=/var/state/${PN}
 		--with-module-dir="${EPREFIX}/usr/share/timidity"
@@ -108,6 +118,7 @@ src_configure() {
 		--enable-dynamic
 		--enable-vt100
 		--enable-spline=cubic
+		--enable-audio=${audios}
 		$(use_enable emacs)
 		$(use_enable slang)
 		$(use_enable ncurses)
@@ -119,47 +130,20 @@ src_configure() {
 		$(use_enable gtk)
 		$(use_enable tk tcltk)
 		$(use_enable motif)
+		$(use motif && use_with motif x)
 		$(use_with Xaw3d xawlib ${xaw_provider})
+		$(use_with nas nas-library "/usr/$(get_libdir)/libaudio.so")
+		$(use nas && use_with nas x)
+		$(use_enable alsa alsaseq)
+		$(use pipewire || use_with alsa default-output alsa)
 		$(use_enable pipewire pipewiresyn)
+		$(use pipewire && use_with pipewire default-output pipewire)
 	)
 
-	use flac && audios+=",flac"
-	use speex && audios+=",speex"
-	use vorbis && audios+=",vorbis"
-	use ogg && audios+=",ogg"
-	use oss && audios+=",oss"
-	use jack && audios+=",jack"
-	use ao && audios+=",ao"
-	use pipewire && audios+=",pipewire"
-
-	if use nas; then
-		audios+=",nas"
-		myeconfargs+=(
-			--with-nas-library="/usr/$(get_libdir)/libaudio.so"
-			--with-x
-		)
-		use X || ewarn "Basic X11 support will be enabled because required by nas."
+	if ! use X; then
+		use nas && ewarn "Basic X11 support will be enabled because required by nas."
+		use motif && ewarn "Basic X11 support will be enabled because required by motif."
 	fi
-
-	if use alsa; then
-		audios+=",alsa"
-		myeconfargs+=(
-			--with-default-output=alsa
-			--enable-alsaseq
-		)
-	fi
-
-	if use motif; then
-		myeconfargs+=(
-			--with-x
-		)
-		use X || ewarn "Basic X11 support will be enabled because required by motif."
-	fi
-
-	# needs to come after all audios have been collected
-	myeconfargs+=(
-		--enable-audio=${audios}
-	)
 
 	econf "${myeconfargs[@]}"
 }
@@ -237,8 +221,7 @@ pkg_postinst() {
 	elog "The tool 'eselect timidity' can be used to switch between installed patchsets."
 
 	if use system-service; then
-		# Add timidity user to the pipewire group so it can access
-		# the PipeWire socket.
+		# Add timidity user to the pipewire group so it can access the PipeWire socket.
 		if use pipewire; then
 			if ! id -nG timidity 2>/dev/null | grep -qw pipewire; then
 				usermod -aG pipewire timidity || ewarn "Failed to add timidity to pipewire group"
