@@ -109,6 +109,10 @@ PATCHES=(
 	# TODO: Soon, we should be able to migrate to just a dropin at
 	# /usr/share. See https://gitlab.freedesktop.org/pipewire/wireplumber/-/issues/652#note_2399735.
 	"${FILESDIR}"/${PN}-0.5.6-config-disable-sound-server-parts.patch
+
+	# Add Midi/* nodes to session item interests so pw-midiplay --target
+	# can find MIDI sinks (e.g. TiMidity++) through the session manager.
+	"${FILESDIR}"/${PN}-0.5.13-midi-session-items.patch
 )
 
 python_check_deps() {

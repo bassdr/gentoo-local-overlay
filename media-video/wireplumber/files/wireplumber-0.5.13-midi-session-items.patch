@@ -1,0 +1,39 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: David <david@bassdr.dev>
+Date: Mon, 17 Mar 2026 00:00:00 +0000
+Subject: [PATCH] node/create-item: Add Midi/* to session item interests
+
+WirePlumber only creates session items (linkable objects) for Stream/*,
+Audio/*, and Video/* media classes.  Midi/* nodes (e.g. a PipeWire filter
+that acts as a MIDI Sink like TiMidity++) are left out, which means
+pw-midiplay --target=<id> can never find its target through the session
+manager and fails with "no target node available".
+
+Add Midi/* to both the create and destroy event interests so that MIDI
+device nodes get proper session items and can participate in the linking
+policy.
+
+--- a/src/scripts/node/create-item.lua
++++ b/src/scripts/node/create-item.lua
+@@ -72,6 +72,10 @@
+       Constraint { "media.class", "#", "Audio/*", type = "pw-global" },
+       Constraint { "wireplumber.is-virtual", "-", type = "pw" },
+     },
++    EventInterest {
++      Constraint { "event.type", "=", "node-added" },
++      Constraint { "media.class", "#", "Midi/*", type = "pw-global" },
++    },
+   },
+   steps = {
+     start = {
+@@ -144,6 +148,10 @@
+       Constraint { "media.class", "#", "Audio/*", type = "pw-global" },
+       Constraint { "wireplumber.is-virtual", "-", type = "pw" },
+     },
++    EventInterest {
++      Constraint { "event.type", "=", "node-removed" },
++      Constraint { "media.class", "#", "Midi/*", type = "pw-global" },
++    },
+   },
+   execute = function (event)
+     local node = event:get_subject ()
