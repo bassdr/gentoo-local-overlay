@@ -198,6 +198,7 @@ PDEPEND=">=media-video/wireplumber-0.5.13_p20260216-r1"
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.3.25-enable-failed-mlock-warning.patch
+	"${FILESDIR}"/${PN}-1.6.2-fix-midi-relink-crash.patch
 )
 
 pkg_setup() {

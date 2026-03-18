@@ -1,0 +1,54 @@
+Fix crash when re-linking MIDI ports after device disconnect/reconnect.
+
+When a link to a control (MIDI) port is destroyed, pw_impl_port_set_param
+is called with param=NULL to clear the format. However, setup_mixer() is
+only called when param != NULL, so the loaded spa.control-mixer plugin
+persists with stale state after all links are removed.
+
+When a new link is subsequently created to the same port (e.g. MIDI
+controller power-cycled), pw_impl_port_init_mix() adds ports to the
+stale mixer, then setup_mixer() replaces it with a new one via
+pw_impl_port_set_mix(). The old mixer's internal state (port list,
+format, position pointer) is inconsistent at this point, and process
+callbacks racing on the data loop can dereference stale pointers,
+crashing the daemon.
+
+Fix by resetting the mixer back to the builtin mix node when the format
+is cleared. Also add a defensive NULL check on this->position in the
+control mixer's process function.
+
+--- a/src/pipewire/impl-port.c
++++ b/src/pipewire/impl-port.c
+@@ -2061,6 +2061,13 @@
+ 		    id == SPA_PARAM_Format && param != NULL &&
+ 		    !SPA_FLAG_IS_SET(port->flags, PW_IMPL_PORT_FLAG_NO_MIXER)) {
+ 			setup_mixer(port, param);
++		} else if (port->direction == PW_DIRECTION_INPUT &&
++			   id == SPA_PARAM_Format && param == NULL &&
++			   port->mix_handle != NULL) {
++			/* Format cleared (all links removed): reset to builtin
++			 * mixer so that re-linking doesn't operate on stale
++			 * control mixer state, which can crash the daemon. */
++			pw_impl_port_set_mix(port, NULL, 0);
+ 		}
+
+ 		spa_list_for_each(mix, &port->mix_list, link) {
+--- a/spa/plugins/control/mixer.c
++++ b/spa/plugins/control/mixer.c
+@@ -708,10 +708,15 @@
+ 	struct spa_pod_frame f;
+ 	struct buffer *outb;
+ 	struct spa_data *d;
+-	uint32_t cycle = this->position->clock.cycle & 1;
++	uint32_t cycle;
+
+ 	spa_return_val_if_fail(this != NULL, -EINVAL);
+
++	if (SPA_UNLIKELY(this->position == NULL))
++		return -EIO;
++
++	cycle = this->position->clock.cycle & 1;
++
+ 	outport = GET_OUT_PORT(this, 0);
+ 	if ((outio = outport->io[cycle]) == NULL)
+ 		return -EIO;
