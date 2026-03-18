@@ -1,54 +1,47 @@
-Fix crash when re-linking MIDI ports after device disconnect/reconnect.
+Fix crash in alsa-seq-bridge when MIDI device is disconnected.
 
-When a link to a control (MIDI) port is destroyed, pw_impl_port_set_param
-is called with param=NULL to clear the format. However, setup_mixer() is
-only called when param != NULL, so the loaded spa.control-mixer plugin
-persists with stale state after all links are removed.
+free_port() zeroes the port struct (including mix_link) without first
+removing the port from stream->mix_list. Meanwhile, process_read() on
+the data loop thread iterates mix_list via spa_list_for_each, hitting
+the zeroed-out list pointers and crashing with SIGSEGV.
 
-When a new link is subsequently created to the same port (e.g. MIDI
-controller power-cycled), pw_impl_port_init_mix() adds ports to the
-stale mixer, then setup_mixer() replaces it with a new one via
-pw_impl_port_set_mix(). The old mixer's internal state (port list,
-format, position pointer) is inconsistent at this point, and process
-callbacks racing on the data loop can dereference stale pointers,
-crashing the daemon.
+The mix_list is only safe to modify from the data loop thread (as
+do_port_set_io already does via spa_loop_locked). Add the same
+synchronization to free_port: use spa_loop_locked to remove the port
+from mix_list on the data loop before zeroing the struct.
 
-Fix by resetting the mixer back to the builtin mix node when the format
-is cleared. Also add a defensive NULL check on this->position in the
-control mixer's process function.
+--- a/spa/plugins/alsa/alsa-seq-bridge.c
++++ b/spa/plugins/alsa/alsa-seq-bridge.c
+@@ -385,10 +385,32 @@
+ 	return port;
+ }
 
---- a/src/pipewire/impl-port.c
-+++ b/src/pipewire/impl-port.c
-@@ -2061,6 +2061,13 @@
- 		    id == SPA_PARAM_Format && param != NULL &&
- 		    !SPA_FLAG_IS_SET(port->flags, PW_IMPL_PORT_FLAG_NO_MIXER)) {
- 			setup_mixer(port, param);
-+		} else if (port->direction == PW_DIRECTION_INPUT &&
-+			   id == SPA_PARAM_Format && param == NULL &&
-+			   port->mix_handle != NULL) {
-+			/* Format cleared (all links removed): reset to builtin
-+			 * mixer so that re-linking doesn't operate on stale
-+			 * control mixer state, which can crash the daemon. */
-+			pw_impl_port_set_mix(port, NULL, 0);
- 		}
-
- 		spa_list_for_each(mix, &port->mix_list, link) {
---- a/spa/plugins/control/mixer.c
-+++ b/spa/plugins/control/mixer.c
-@@ -708,10 +708,15 @@
- 	struct spa_pod_frame f;
- 	struct buffer *outb;
- 	struct spa_data *d;
--	uint32_t cycle = this->position->clock.cycle & 1;
-+	uint32_t cycle;
-
- 	spa_return_val_if_fail(this != NULL, -EINVAL);
-
-+	if (SPA_UNLIKELY(this->position == NULL))
-+		return -EIO;
++struct free_port_info {
++	struct seq_state *state;
++	struct seq_port *port;
++};
 +
-+	cycle = this->position->clock.cycle & 1;
++static int do_free_port_mix(struct spa_loop *loop, bool async, uint32_t seq,
++		const void *data, size_t size, void *user_data)
++{
++	struct free_port_info *info = user_data;
++	struct seq_port *port = info->port;
 +
- 	outport = GET_OUT_PORT(this, 0);
- 	if ((outio = outport->io[cycle]) == NULL)
- 		return -EIO;
++	if (port->mixing) {
++		spa_list_remove(&port->mix_link);
++		port->mixing = false;
++	}
++	return 0;
++}
++
+ static void free_port(struct seq_state *state, struct seq_stream *stream, struct seq_port *port)
+ {
++	struct free_port_info info = { .state = state, .port = port };
++
+ 	stream->ports[port->id] = NULL;
+ 	spa_list_remove(&port->link);
++	spa_loop_locked(state->data_loop, do_free_port_mix,
++			SPA_ID_INVALID, NULL, 0, &info);
+
+ 	spa_node_emit_port_info(&state->hooks,
+ 			port->direction, port->id, NULL);
