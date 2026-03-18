@@ -68,7 +68,10 @@ PDEPEND="|| ( media-sound/timidity-eawpatches media-sound/timidity-freepats )"
 
 SITEFILE=50${PN}-gentoo.el
 
-DOCS=( AUTHORS ChangeLog NEWS README.md "${FILESDIR}"/timidity.cfg-r1 )
+# dist/ files ship in the source tarball
+DIST="${S}/dist"
+
+DOCS=( AUTHORS ChangeLog NEWS README.md "${DIST}"/config/timidity.cfg )
 
 src_prepare() {
 	default
@@ -154,8 +157,8 @@ src_install() {
 
 	# System-service: OpenRC init, log dir, systemd unit, udev auto-connect
 	if use system-service; then
-		newconfd "${FILESDIR}"/timidity.confd timidity
-		newinitd "${FILESDIR}"/timidity.initd timidity
+		newconfd "${DIST}"/openrc/timidity.confd timidity
+		newinitd "${DIST}"/openrc/timidity.initd timidity
 
 		if use pipewire; then
 			# Switch defaults to PipeWire: -ip interface, -OW output
@@ -167,16 +170,16 @@ src_install() {
 				"${ED}"/etc/conf.d/timidity || die
 		fi
 
-		systemd_dounit "${FILESDIR}"/timidity.service
+		systemd_dounit "${DIST}"/systemd/timidity.service
 
 		# udev rule + helper to auto-connect MIDI devices to the sequencer
-		udev_dorules "${FILESDIR}"/99-timidity-midi.rules
+		udev_dorules "${DIST}"/udev/99-timidity-midi.rules
 		exeinto /usr/lib/udev
-		doexe "${FILESDIR}"/timidity-midi-connect
+		doexe "${DIST}"/udev/timidity-midi-connect
 	fi
 
 	insinto /etc
-	newins "${FILESDIR}"/timidity.cfg-r1 timidity.cfg
+	newins "${DIST}"/config/timidity.cfg timidity.cfg
 
 	dodir /usr/share/timidity
 	dosym ../../../etc/timidity.cfg /usr/share/timidity/timidity.cfg
@@ -185,8 +188,8 @@ src_install() {
 		elisp-site-file-install "${FILESDIR}/${SITEFILE}"
 	fi
 
-	doicon "${FILESDIR}"/timidity.xpm
-	newmenu "${FILESDIR}"/timidity.desktop.2 timidity.desktop
+	doicon "${DIST}"/desktop/timidity.xpm
+	newmenu "${DIST}"/desktop/timidity.desktop timidity.desktop
 
 	# Order of preference: gtk, X (Xaw), ncurses, slang
 	# Do not create menu item for terminal ones
