@@ -380,6 +380,10 @@ multilib_src_install_all() {
 	fi
 
 	if use system-service; then
+		# Disable session-bus-dependent WirePlumber features for system-service mode
+		insinto /etc/wireplumber/wireplumber.conf.d
+		doins "${FILESDIR}"/gentoo-system-service-profile.conf
+
 		if use systemd; then
 			newtmpfiles - pipewire.conf <<-EOF || die
 				d /run/pipewire 0755 pipewire pipewire - -
