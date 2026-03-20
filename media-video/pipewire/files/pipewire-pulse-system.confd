@@ -1,0 +1,11 @@
+# /etc/conf.d/pipewire-pulse-system
+# Configuration for the PipeWire PulseAudio compatibility daemon (OpenRC).
+# Shared variables (user, group, dirs) come from pipewire-system.
+. /etc/conf.d/pipewire-system
+
+# Tell libpulse we are in system mode. Without this, any process that loads
+# libpulse (e.g. alsa-plugins' pulse module for a52 HDMI encoding) will
+# fchmod $XDG_RUNTIME_DIR/pulse back to 0700, locking out non-owner users.
+# With PULSE_SYSTEM=1, libpulse uses /var/run/pulse as its runtime directory
+# instead, leaving /run/pipewire/pulse alone.
+PULSE_SYSTEM=1

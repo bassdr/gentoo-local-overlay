@@ -1,0 +1,4 @@
+# /etc/conf.d/wireplumber-system
+# Configuration for the WirePlumber system session manager (OpenRC).
+# All shared variables come from pipewire-system; override here if needed.
+. /etc/conf.d/pipewire-system

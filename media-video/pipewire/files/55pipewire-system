@@ -1,0 +1,4 @@
+# Installed by media-video/pipewire[system-service] on OpenRC.
+# Points PipeWire clients at the system-wide socket.
+# This prevents gentoo-pipewire-launcher from starting a competing instance.
+PIPEWIRE_RUNTIME_DIR="/run/pipewire"

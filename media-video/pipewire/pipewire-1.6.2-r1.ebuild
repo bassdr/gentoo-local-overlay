@@ -389,8 +389,10 @@ multilib_src_install_all() {
 			# creates /run/pipewire in start_pre via checkpath.
 			exeinto /etc/init.d
 			newexe "${FILESDIR}"/pipewire-system.initd pipewire-system
+			newconfd "${FILESDIR}"/pipewire-system.confd pipewire-system
 			if use sound-server; then
 				newexe "${FILESDIR}"/pipewire-pulse-system.initd pipewire-pulse-system
+				newconfd "${FILESDIR}"/pipewire-pulse-system.confd pipewire-pulse-system
 			fi
 		fi
 	fi
@@ -401,9 +403,12 @@ multilib_src_install_all() {
 			# gentoo-pipewire-launcher are intentionally NOT installed.
 			# Installing them would spawn a competing per-user pipewire/wireplumber
 			# on login, conflicting with the system instance (see bug #964059).
-			# Instead, point all clients at the system socket via profile.d.
-			insinto /etc/profile.d
-			newins "${FILESDIR}"/pipewire-system-env.sh pipewire-system.sh
+			# Instead, point all clients at the system socket via env.d.
+			insinto /etc/env.d
+			newins "${FILESDIR}"/55pipewire-system 55pipewire-system
+			if use sound-server; then
+				newins "${FILESDIR}"/55pipewire-pulse-system 55pipewire-pulse-system
+			fi
 		else
 			insinto /etc/xdg/autostart
 			newins "${FILESDIR}"/pipewire.desktop-r2 pipewire.desktop
@@ -586,9 +591,11 @@ pkg_postinst() {
 			fi
 			elog
 			elog "gentoo-pipewire-launcher and pipewire.desktop autostart are NOT installed"
-			elog "(see bug #964059). /etc/profile.d/pipewire-system.sh sets"
-			elog "PIPEWIRE_RUNTIME_DIR=/run/pipewire so user sessions connect to the"
+			elog "(see bug #964059). /etc/env.d/55pipewire-system sets"
+			elog "PIPEWIRE_RUNTIME_DIR and PULSE_SERVER so user sessions connect to the"
 			elog "system socket instead of spawning their own instance."
+			elog
+			elog "Run 'env-update && source /etc/profile' to activate the new environment."
 			elog
 			elog "Users connecting to the system instance should be in the 'pipewire' group:"
 			elog "  usermod -aG pipewire <youruser>"

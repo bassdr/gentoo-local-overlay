@@ -1,0 +1,8 @@
+# Installed by media-video/pipewire[system-service,sound-server] on OpenRC.
+# Points PulseAudio clients at the system-wide PipeWire-pulse socket.
+PULSE_SERVER="unix:/run/pipewire/pulse/native"
+# Prevent libpulse from fchmod-ing /run/pipewire/pulse to 0700 when loaded
+# indirectly (e.g. via alsa-plugins' pulse module for a52 HDMI encoding).
+# In system mode, libpulse uses /var/run/pulse as its runtime directory
+# instead of $XDG_RUNTIME_DIR/pulse, leaving /run/pipewire/pulse alone.
+PULSE_SYSTEM=1

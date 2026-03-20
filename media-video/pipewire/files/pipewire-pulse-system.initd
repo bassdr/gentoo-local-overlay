@@ -5,12 +5,16 @@
 # System-wide PipeWire PulseAudio compatibility daemon for OpenRC.
 # Creates /run/pipewire/pulse/native for PulseAudio clients.
 
+# Defaults — overridden by /etc/conf.d/pipewire-pulse-system (sourced by OpenRC),
+# which in turn sources /etc/conf.d/pipewire-system.
 : "${PIPEWIRE_USER:=pipewire}"
 : "${PIPEWIRE_GROUP:=pipewire}"
 : "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
 : "${PIPEWIRE_LOG_DIR:=/var/log/pipewire}"
+: "${PULSE_SYSTEM:=1}"
 
 export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
+export PULSE_SYSTEM
 
 supervisor=supervise-daemon
 command="/usr/bin/pipewire"

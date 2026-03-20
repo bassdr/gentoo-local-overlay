@@ -171,6 +171,7 @@ src_install() {
 		# connects to pipewire-system socket at /run/pipewire.
 		exeinto /etc/init.d
 		newexe "${FILESDIR}"/wireplumber-system.initd wireplumber-system
+		newconfd "${FILESDIR}"/wireplumber-system.confd wireplumber-system
 	fi
 
 	mv "${ED}"/usr/share/doc/wireplumber/* "${ED}"/usr/share/doc/${PF} || die

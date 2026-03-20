@@ -8,6 +8,7 @@
 #
 # Configuration: /etc/conf.d/pipewire-system
 
+# Defaults — overridden by /etc/conf.d/pipewire-system (sourced by OpenRC).
 : "${PIPEWIRE_USER:=pipewire}"
 : "${PIPEWIRE_GROUP:=pipewire}"
 : "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"

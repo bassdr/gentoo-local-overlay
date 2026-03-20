@@ -7,6 +7,8 @@
 #
 # Configuration: /etc/conf.d/wireplumber-system
 
+# Defaults — overridden by /etc/conf.d/wireplumber-system (sourced by OpenRC),
+# which in turn sources /etc/conf.d/pipewire-system.
 : "${PIPEWIRE_USER:=pipewire}"
 : "${PIPEWIRE_GROUP:=pipewire}"
 : "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"

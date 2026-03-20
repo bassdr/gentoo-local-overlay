@@ -1,0 +1,13 @@
+# /etc/conf.d/pipewire-system
+# Shared configuration for the PipeWire system-service stack (OpenRC).
+# Sourced by pipewire-system, pipewire-pulse-system, and wireplumber-system.
+
+# User and group the daemons run as.
+PIPEWIRE_USER="pipewire"
+PIPEWIRE_GROUP="pipewire"
+
+# Runtime directory — also exported as XDG_RUNTIME_DIR to the daemons.
+PIPEWIRE_RUNTIME_DIR="/run/pipewire"
+
+# Log directory for all PipeWire system daemons.
+PIPEWIRE_LOG_DIR="/var/log/pipewire"
