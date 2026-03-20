@@ -11,6 +11,7 @@
 : "${PIPEWIRE_USER:=pipewire}"
 : "${PIPEWIRE_GROUP:=pipewire}"
 : "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
+: "${PIPEWIRE_LOG_DIR:=/var/log/pipewire}"
 
 export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
 
@@ -18,6 +19,8 @@ supervisor=supervise-daemon
 command="/usr/bin/pipewire"
 command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
 pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-pipewire.pid"
+output_log="${PIPEWIRE_LOG_DIR}/pipewire.log"
+error_log="${PIPEWIRE_LOG_DIR}/pipewire.log"
 
 depend() {
 	need dbus udev
@@ -26,13 +29,19 @@ depend() {
 
 start_pre() {
 	checkpath -d -o "${PIPEWIRE_USER}:${PIPEWIRE_GROUP}" -m 0755 "${PIPEWIRE_RUNTIME_DIR}"
+	checkpath -d -o "${PIPEWIRE_USER}:${PIPEWIRE_GROUP}" -m 0755 "${PIPEWIRE_LOG_DIR}"
+	# Remove stale sockets so start_post correctly waits for fresh ones.
+	rm -f "${PIPEWIRE_RUNTIME_DIR}"/pipewire-0 \
+	      "${PIPEWIRE_RUNTIME_DIR}"/pipewire-0.lock \
+	      "${PIPEWIRE_RUNTIME_DIR}"/pipewire-0-manager \
+	      "${PIPEWIRE_RUNTIME_DIR}"/pipewire-0-manager.lock
 }
 
 start_post() {
-	# PipeWire creates its sockets as 0755; open them to the pipewire group
-	# so users in that group can connect (Unix sockets require write access).
+	# PipeWire creates its sockets with restricted permissions; open them
+	# to the pipewire group so users in that group can connect.
 	local i=0
-	while [ $i -lt 10 ] && [ ! -S "${PIPEWIRE_RUNTIME_DIR}/pipewire-0" ]; do
+	while [ $i -lt 15 ] && [ ! -S "${PIPEWIRE_RUNTIME_DIR}/pipewire-0" ]; do
 		sleep 0.2
 		i=$(( i + 1 ))
 	done

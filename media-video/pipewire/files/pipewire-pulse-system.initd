@@ -8,6 +8,7 @@
 : "${PIPEWIRE_USER:=pipewire}"
 : "${PIPEWIRE_GROUP:=pipewire}"
 : "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
+: "${PIPEWIRE_LOG_DIR:=/var/log/pipewire}"
 
 export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
 
@@ -16,18 +17,31 @@ command="/usr/bin/pipewire"
 command_args="-c pipewire-pulse.conf"
 command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
 pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-pipewire-pulse.pid"
+output_log="${PIPEWIRE_LOG_DIR}/pipewire-pulse.log"
+error_log="${PIPEWIRE_LOG_DIR}/pipewire-pulse.log"
 
 depend() {
 	need wireplumber-system
 }
 
+start_pre() {
+	# Remove stale socket so start_post correctly waits for the new one.
+	rm -f "${PIPEWIRE_RUNTIME_DIR}/pulse/native"
+	rm -f "${PIPEWIRE_RUNTIME_DIR}/pulse/pid"
+}
+
 start_post() {
-	# PipeWire creates pulse/ as 0700; open it to the pipewire group
-	# so users in that group can connect via PULSE_SERVER.
+	# PipeWire creates the pulse/ directory as 0700. Wait for the socket
+	# to appear, then open the directory to the pipewire group so that
+	# users in that group can connect via PULSE_SERVER.
 	local i=0
-	while [ $i -lt 10 ] && [ ! -S "${PIPEWIRE_RUNTIME_DIR}/pulse/native" ]; do
+	while [ $i -lt 30 ] && [ ! -S "${PIPEWIRE_RUNTIME_DIR}/pulse/native" ]; do
 		sleep 0.2
 		i=$(( i + 1 ))
 	done
-	chmod 750 "${PIPEWIRE_RUNTIME_DIR}/pulse" 2>/dev/null || true
+	if [ -S "${PIPEWIRE_RUNTIME_DIR}/pulse/native" ]; then
+		chmod 750 "${PIPEWIRE_RUNTIME_DIR}/pulse"
+	else
+		ewarn "PulseAudio socket not found — PulseAudio clients may fail to connect"
+	fi
 }

@@ -10,6 +10,7 @@
 : "${PIPEWIRE_USER:=pipewire}"
 : "${PIPEWIRE_GROUP:=pipewire}"
 : "${PIPEWIRE_RUNTIME_DIR:=/run/pipewire}"
+: "${PIPEWIRE_LOG_DIR:=/var/log/pipewire}"
 
 export XDG_RUNTIME_DIR="${PIPEWIRE_RUNTIME_DIR}"
 
@@ -17,6 +18,8 @@ supervisor=supervise-daemon
 command="/usr/bin/wireplumber"
 command_user="${PIPEWIRE_USER}:${PIPEWIRE_GROUP}"
 pidfile="${PIPEWIRE_RUNTIME_DIR}/openrc-wireplumber.pid"
+output_log="${PIPEWIRE_LOG_DIR}/wireplumber.log"
+error_log="${PIPEWIRE_LOG_DIR}/wireplumber.log"
 
 depend() {
 	need pipewire-system dbus udev
