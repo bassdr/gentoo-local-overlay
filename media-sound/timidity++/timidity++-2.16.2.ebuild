@@ -160,14 +160,11 @@ src_install() {
 		newconfd "${DIST}"/openrc/timidity.confd timidity
 		newinitd "${DIST}"/openrc/timidity.initd timidity
 
-		if use pipewire; then
-			# Switch defaults to PipeWire: -ip interface, -OW output
+		if ! use pipewire; then
+			# Upstream defaults to PipeWire (-ipA); switch to ALSA sequencer
 			sed -i \
-				-e 's/^: "${TIMIDITY_INTERFACE:=-iA}"/: "${TIMIDITY_INTERFACE:=-ip}"/' \
+				-e 's/^: "${TIMIDITY_INTERFACE:=-ipA}"/: "${TIMIDITY_INTERFACE:=-iA}"/' \
 				"${ED}"/etc/init.d/timidity || die
-			sed -i \
-				-e 's/^TIMIDITY_OPTS="-B2,8 -EFreverb=0"/TIMIDITY_OPTS="-OW -EFreverb=0"/' \
-				"${ED}"/etc/conf.d/timidity || die
 		fi
 
 		systemd_dounit "${DIST}"/systemd/timidity.service
@@ -239,14 +236,11 @@ pkg_postinst() {
 		elog "  rc-update add timidity default"
 		elog
 		if use pipewire; then
-			elog "Output defaults to PipeWire native (-OW) with PipeWire MIDI (-ip)."
-			elog "To route through PulseAudio instead, enable USE=ao and set"
-			elog "TIMIDITY_OPTS=\"-OO -EFreverb=0\" in /etc/conf.d/timidity."
+			elog "Output defaults to PipeWire native (-OW) with PipeWire MIDI (-ipA)."
 		else
 			elog "Output defaults to ALSA (-Os) with ALSA sequencer (-iA)."
-			elog "To route through PipeWire, enable USE=ao and set"
-			elog "TIMIDITY_OPTS=\"-OO -EFreverb=0\" in /etc/conf.d/timidity."
 		fi
+		elog "See /etc/conf.d/timidity for available options."
 		elog
 		elog "A udev rule has been installed to auto-connect USB MIDI devices to"
 		elog "the TiMidity sequencer when they are plugged in."
