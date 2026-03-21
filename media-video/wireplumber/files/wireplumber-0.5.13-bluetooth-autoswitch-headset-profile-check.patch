@@ -1,0 +1,93 @@
+--- a/src/scripts/device/autoswitch-bluetooth-profile.lua	2026-03-21 00:36:45.549529577 -0400
++++ b/src/scripts/device/autoswitch-bluetooth-profile.lua	2026-03-21 00:37:54.243115179 -0400
+@@ -86,14 +86,24 @@
+   return nil
+ end
+ 
+-function highestPrioProfileWithInputRoute (device)
++function isHeadsetProfile (device, profile)
++  if hasProfileInputRoute (device, profile.index) and
++      (string.find (profile.name, "^headset%-head%-unit") or
++       profile.name == "bap-duplex") then
++    return true
++  else
++    return false
++  end
++end
++
++function highestPrioHeadsetProfile (device)
+   local found_profile = nil
+   for p in device:iterate_params ("EnumRoute") do
+     local route = cutils.parseParam (p, "EnumRoute")
+     if route ~= nil and route.profiles ~= nil and route.direction == "Input" then
+       for _, v in pairs (route.profiles) do
+         local p = findProfile (device, v)
+-        if p ~= nil then
++        if p ~= nil and isHeadsetProfile (device, p) then
+           if found_profile == nil or found_profile.priority < p.priority then
+             found_profile = p
+           end
+@@ -104,14 +114,14 @@
+   return found_profile
+ end
+ 
+-function highestPrioProfileWithoutInputRoute (device)
++function highestPrioNonHeadsetProfile (device)
+   local found_profile = nil
+   for p in device:iterate_params ("EnumRoute") do
+     local route = cutils.parseParam (p, "EnumRoute")
+     if route ~= nil and route.profiles ~= nil and route.direction ~= "Input" then
+       for _, v in pairs (route.profiles) do
+         local p = findProfile (device, v)
+-        if p ~= nil then
++        if p ~= nil and not isHeadsetProfile (device, p) then
+           if found_profile == nil or found_profile.priority < p.priority then
+             found_profile = p
+           end
+@@ -148,8 +158,7 @@
+ 
+   -- Do not switch if the current profile is already a headset profile
+   local cur_profile = getCurrentProfile (device)
+-  if cur_profile ~= nil and
+-      hasProfileInputRoute (device, cur_profile.index) then
++  if cur_profile ~= nil and isHeadsetProfile (device, cur_profile) then
+     log:info (device,
+         "Current profile is already a headset profile, no need to switch")
+     return
+@@ -165,7 +174,7 @@
+     end
+   end
+   if profile == nil then
+-    profile = highestPrioProfileWithInputRoute (device)
++    profile = highestPrioHeadsetProfile (device)
+   end
+ 
+   -- Switch if headset profile was found
+@@ -195,8 +204,7 @@
+ 
+   -- Do not restore if the current profile is already a non-headset profile
+   local cur_profile = getCurrentProfile (device)
+-  if cur_profile ~= nil and
+-      not hasProfileInputRoute (device, cur_profile.index) then
++  if cur_profile ~= nil and not isHeadsetProfile (device, cur_profile) then
+     log:info (device,
+         "Current profile is already a non-headset profile, no need to restore")
+     return
+@@ -212,7 +220,7 @@
+     end
+   end
+   if profile == nil then
+-    profile = highestPrioProfileWithoutInputRoute (device)
++    profile = highestPrioNonHeadsetProfile (device)
+   end
+ 
+   -- Restore if non-headset profile was found
+@@ -477,7 +485,7 @@
+     -- Always save the current profile when it changes
+     local cur_profile = getCurrentProfile (device)
+     if cur_profile ~= nil then
+-      if hasProfileInputRoute (device, cur_profile.index) then
++      if isHeadsetProfile (device, cur_profile) then
+         log:info (device, "Saving headset profile " .. cur_profile.name)
+         saveHeadsetProfile (device, cur_profile.name, cur_profile.save)
+       else
