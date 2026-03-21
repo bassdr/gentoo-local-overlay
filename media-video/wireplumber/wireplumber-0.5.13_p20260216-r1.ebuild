@@ -172,12 +172,18 @@ src_install() {
 	exeinto /etc/user/init.d
 	newexe "${FILESDIR}"/wireplumber.initd wireplumber
 
-	if use system-service && ! use systemd; then
-		# bassdr: OpenRC system service — runs as acct-user/pipewire,
-		# connects to pipewire-system socket at /run/pipewire.
-		exeinto /etc/init.d
-		newexe "${FILESDIR}"/wireplumber-system.initd wireplumber-system
-		newconfd "${FILESDIR}"/wireplumber-system.confd wireplumber-system
+	if use system-service; then
+		# Default sink volume to 100% in system-service mode
+		insinto /usr/share/wireplumber/wireplumber.conf.d
+		doins "${FILESDIR}"/wireplumber-system-default-volume.conf
+
+		if ! use systemd; then
+			# bassdr: OpenRC system service — runs as acct-user/pipewire,
+			# connects to pipewire-system socket at /run/pipewire.
+			exeinto /etc/init.d
+			newexe "${FILESDIR}"/wireplumber-system.initd wireplumber-system
+			newconfd "${FILESDIR}"/wireplumber-system.confd wireplumber-system
+		fi
 	fi
 
 	mv "${ED}"/usr/share/doc/wireplumber/* "${ED}"/usr/share/doc/${PF} || die
