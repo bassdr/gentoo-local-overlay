@@ -9,18 +9,22 @@ EAPI=8
 
 inherit autotools desktop elisp-common flag-o-matic systemd udev xdg
 
-MY_PV="${PV/_/-}"
-MY_P="TiMidity++-${MY_PV}"
-
 DESCRIPTION="Handy MIDI to WAV converter with OSS and ALSA output support"
 HOMEPAGE="https://github.com/bassdr/timidity"
-SRC_URI="https://github.com/bassdr/timidity/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
-S="${WORKDIR}/timidity-${PV}"
+
+if [[ ${PV} == 9999 ]] ; then
+	inherit git-r3
+	EGIT_REPO_URI="https://github.com/bassdr/timidity.git"
+	EGIT_BRANCH="main"
+else
+	SRC_URI="https://github.com/bassdr/timidity/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
+	KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
+	S="${WORKDIR}/timidity-${PV}"
+fi
 
 LICENSE="GPL-2+"
 SLOT="0"
-KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
-IUSE="alsa ao emacs flac gtk jack motif nas ncurses ogg oss pipewire selinux slang speex system-service tk vorbis X Xaw3d"
+IUSE="alsa ao cpu_flags_x86_sse4_1 emacs flac gtk jack motif nas ncurses ogg oss pipewire selinux slang speex system-service tk vorbis X Xaw3d"
 
 REQUIRED_USE="
 	tk? ( X )
@@ -79,27 +83,6 @@ src_prepare() {
 }
 
 src_configure() {
-	export EXTRACFLAGS="${CFLAGS}" #385817
-
-	local audios
-	# List by preference
-	local xaw_provider=$(usex Xaw3d 'xaw3d' 'xaw')
-
-	# configure workarounds: configure.in here is written for an old version
-	# of autoconf and upstream seems quite dead.
-	#
-	# 1. Avoid janky configure test breaking
-	# ```checking for sys/wait.h that is POSIX.1 compatible... yes
-	# ./configure: 7995: test: =: unexpected operator```
-	export ac_cv_header_sys_time_h=yes
-	#
-	# 2. And yes, we expect standard header locations (this configure test is flaky for us too)
-	# This avoids a bunch of implicit decl. errors which only happen with USE=-Xaw3d(?!)
-	append-cppflags -DSTDC_HEADERS
-
-	# bug #943939
-	append-cflags -std=gnu17
-
 	use flac && audios+=",flac"
 	use speex && audios+=",speex"
 	use vorbis && audios+=",vorbis"
@@ -115,12 +98,14 @@ src_configure() {
 		--localstatedir=/var/state/${PN}
 		--with-module-dir="${EPREFIX}/usr/share/timidity"
 		--with-lispdir="${SITELISP}/${PN}"
+		--with-xawlib=$(usex Xaw3d 'xaw3d' 'xaw')
 		--with-elf
 		--enable-server
 		--enable-network
 		--enable-dynamic
 		--enable-vt100
 		--enable-spline=cubic
+		--enable-fixed-resamplation
 		--enable-audio=${audios}
 		$(use_enable emacs)
 		$(use_enable slang)
@@ -134,13 +119,13 @@ src_configure() {
 		$(use_enable tk tcltk)
 		$(use_enable motif)
 		$(use motif && use_with motif x)
-		$(use_with Xaw3d xawlib ${xaw_provider})
 		$(use_with nas nas-library "/usr/$(get_libdir)/libaudio.so")
 		$(use nas && use_with nas x)
 		$(use_enable alsa alsaseq)
 		$(use pipewire || use_with alsa default-output alsa)
 		$(use_enable pipewire pipewiresyn)
 		$(use pipewire && use_with pipewire default-output pipewire)
+		$(use_enable cpu_flags_x86_sse4_1 simd-mixing)
 	)
 
 	if ! use X; then

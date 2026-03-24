@@ -6,6 +6,9 @@
 		<name>Gentoo Sound project</name>
 	</maintainer>
 	<use>
+		<flag name="cpu_flags_x86_sse4_1">
+			Use SSE4.1 SIMD instructions for mixing and format conversion.
+		</flag>
 		<flag name="pipewire">
 			Enable native PipeWire audio output and PipeWire MIDI synthesizer support.
 		</flag>
