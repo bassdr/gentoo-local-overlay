@@ -104,7 +104,7 @@ src_configure() {
 		--enable-network
 		--enable-dynamic
 		--enable-vt100
-		--enable-spline=cubic
+		--enable-spline=gauss
 		--enable-fixed-resamplation
 		--enable-audio=${audios}
 		$(use_enable emacs)
