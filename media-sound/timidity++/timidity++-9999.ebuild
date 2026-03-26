@@ -24,7 +24,7 @@ fi
 
 LICENSE="GPL-2+"
 SLOT="0"
-IUSE="alsa ao cpu_flags_x86_sse4_1 emacs flac gtk jack motif nas ncurses ogg oss pipewire selinux slang speex system-service tk vorbis X Xaw3d"
+IUSE="alsa ao cpu_flags_arm_neon cpu_flags_x86_sse4_1 emacs flac gtk jack motif nas ncurses ogg oss pipewire selinux slang speex system-service tk vorbis X Xaw3d"
 
 REQUIRED_USE="
 	tk? ( X )
@@ -125,7 +125,9 @@ src_configure() {
 		$(use pipewire || use_with alsa default-output alsa)
 		$(use_enable pipewire pipewiresyn)
 		$(use pipewire && use_with pipewire default-output pipewire)
-		$(use_enable cpu_flags_x86_sse4_1 simd-mixing)
+		$(usex arm64 '--enable-simd-mixing' '')
+		$(usex cpu_flags_arm_neon '--enable-simd-mixing' '')
+		$(usex cpu_flags_x86_sse4_1 '--enable-simd-mixing' '')
 	)
 
 	if ! use X; then
