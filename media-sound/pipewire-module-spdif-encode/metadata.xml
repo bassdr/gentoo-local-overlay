@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>bass_dr@hotmail.com</email>
+		<name>David Racine</name>
+	</maintainer>
+	<longdescription>
+		Native PipeWire module that creates a virtual 5.1 surround sink,
+		encodes multichannel PCM to AC3 (Dolby Digital) or DTS in real-time,
+		and outputs IEC 61937-framed data to a hardware S/PDIF, TOSLINK, or
+		HDMI device.  Replaces the ALSA a52/dca plugin chain with a single
+		module that talks directly to the PipeWire graph.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">bassdr/pipewire-module-spdif-encode</remote-id>
+	</upstream>
+</pkgmetadata>
