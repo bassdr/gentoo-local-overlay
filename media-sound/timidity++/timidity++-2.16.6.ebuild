@@ -18,7 +18,7 @@ if [[ ${PV} == 9999 ]] ; then
 	EGIT_BRANCH="main"
 else
 	SRC_URI="https://github.com/bassdr/timidity/archive/refs/tags/v${PV}.tar.gz -> ${P}.tar.gz"
-	KEYWORDS="~amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
+	KEYWORDS="amd64 ~arm ~arm64 ~hppa ~loong ~ppc ~ppc64 ~riscv ~sparc ~x86"
 	S="${WORKDIR}/timidity-${PV}"
 fi
 
