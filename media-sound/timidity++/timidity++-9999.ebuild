@@ -70,8 +70,6 @@ RDEPEND="
 
 PDEPEND="|| ( media-sound/timidity-eawpatches media-sound/timidity-freepats )"
 
-SITEFILE=50${PN}-gentoo.el
-
 # dist/ files ship in the source tarball
 DIST="${S}/dist"
 
@@ -169,7 +167,7 @@ src_install() {
 	dosym ../../../etc/timidity.cfg /usr/share/timidity/timidity.cfg
 
 	if use emacs; then
-		elisp-site-file-install "${FILESDIR}/${SITEFILE}"
+		elisp-site-file-install "${DIST}/50${PN}-gentoo.el"
 	fi
 
 	doicon "${DIST}"/desktop/timidity.xpm
