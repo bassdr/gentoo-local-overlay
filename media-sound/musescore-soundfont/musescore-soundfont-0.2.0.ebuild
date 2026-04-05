@@ -39,8 +39,8 @@ pkg_postinst() {
 
 	elog "MuseScore General SoundFont installed to /usr/share/sounds/sf2/"
 	elog
-	elog "To use with TiMidity++:"
-	elog "  eselect timidity set musescore-soundfont"
+	elog "To use with TiMidity++ (system-wide):"
+	elog "  eselect timidity set --global musescore-soundfont"
 	elog
 	elog "Note: this patchset may not appear in 'eselect timidity list'"
 	elog "due to a hardcoded list in the eselect module, but manual"
