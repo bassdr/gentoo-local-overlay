@@ -185,7 +185,7 @@ RDEPEND="
 
 DEPEND="${RDEPEND}"
 
-PDEPEND=">=media-video/wireplumber-0.5.13_p20260216-r1"
+PDEPEND=">=media-video/wireplumber-0.5.2"
 
 # Present RDEPEND that are currently always disabled due to the PW
 # code using them being required to be disabled by Gentoo guidelines
@@ -199,6 +199,7 @@ PDEPEND=">=media-video/wireplumber-0.5.13_p20260216-r1"
 PATCHES=(
 	"${FILESDIR}"/${PN}-0.3.25-enable-failed-mlock-warning.patch
 	"${FILESDIR}"/${PN}-1.6.2-fix-midi-relink-crash.patch
+	"${FILESDIR}"/${PN}-1.6.4-spa-builder-negative-size_t.patch
 )
 
 pkg_setup() {

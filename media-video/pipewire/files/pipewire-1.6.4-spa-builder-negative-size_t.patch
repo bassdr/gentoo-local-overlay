@@ -1,0 +1,21 @@
+diff '--color=auto' -ur pipewire-1.6.4.old/spa/include/spa/pod/builder.h pipewire-1.6.4/spa/include/spa/pod/builder.h
+--- pipewire-1.6.4.old/spa/include/spa/pod/builder.h	2026-04-22 22:36:06.732457377 -0400
++++ pipewire-1.6.4/spa/include/spa/pod/builder.h	2026-04-22 22:37:18.695860852 -0400
+@@ -140,7 +140,7 @@
+ 	int res = 0;
+ 	struct spa_pod_frame *f;
+ 	uint32_t offset = builder->state.offset;
+-	size_t data_offset = -1;
++	size_t data_offset = SIZE_MAX;
+ 	uint64_t total_size = offset + (uint64_t) size;
+ 
+ 	if (total_size > builder->size) {
+@@ -158,7 +158,7 @@
+ 					overflow, 0, total_size);
+ 	}
+ 	if (res == 0 && data) {
+-		if (data_offset != (size_t) -1)
++		if (data_offset != SIZE_MAX)
+ 			data = SPA_PTROFF(builder->data, data_offset, const void);
+ 
+ 		memcpy(SPA_PTROFF(builder->data, offset, void), data, size);
