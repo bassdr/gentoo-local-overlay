@@ -29,7 +29,7 @@ WIREPLUMBER_DOCS_VERSION="$(ver_cut 1-3)"
 WIREPLUMBER_DOCS_USEFLAG="+doc"
 
 LUA_COMPAT=( lua5-{3,4} )
-PYTHON_COMPAT=( python3_{11..14} )
+PYTHON_COMPAT=( python3_{12..14} )
 
 inherit lua-single meson python-any-r1 systemd
 
@@ -54,7 +54,7 @@ else
 		WIREPLUMBER_DOCS_USEFLAG="doc"
 	fi
 
-	KEYWORDS="amd64 arm arm64 ~loong ~mips ppc ppc64 ~riscv ~sparc x86"
+	KEYWORDS="~amd64 ~arm ~arm64 ~loong ~mips ~ppc ~ppc64 ~riscv ~sparc ~x86"
 fi
 
 LICENSE="MIT"
@@ -114,11 +114,7 @@ PATCHES=(
 	# can find MIDI sinks (e.g. TiMidity++) through the session manager.
 	"${FILESDIR}"/${PN}-0.5.13-midi-session-items.patch
 
-	# Backport upstream fix: use profile name matching (not just Input
-	# route presence) to distinguish HSP/HFP from A2DP profiles.  Some
-	# devices expose an Input route for all profiles (loopback source),
-	# which made the autoswitch think A2DP was already a headset profile.
-	"${FILESDIR}"/${PN}-0.5.13-bluetooth-autoswitch-headset-profile-check.patch
+	"${FILESDIR}"/${PN}-0.5.14-bt-autoswitch.patch
 )
 
 python_check_deps() {
