@@ -7,7 +7,7 @@
 
 EAPI=8
 
-inherit autotools desktop elisp-common flag-o-matic linux-info systemd udev xdg
+inherit autotools desktop elisp-common linux-info systemd udev xdg
 
 DESCRIPTION="Handy MIDI to WAV converter with OSS and ALSA output support"
 HOMEPAGE="https://github.com/bassdr/timidity"
@@ -99,16 +99,6 @@ src_prepare() {
 }
 
 src_configure() {
-	# Float mixing (auto-enabled with PipeWire) adds -O3 -ffast-math via
-	# configure.ac.  Promote CFLAGS to -O3 here so it doesn't appear after
-	# the distro's -O2 as a redundant override.  Users who explicitly want
-	# -O2 can set it in package.env (it will still be overridden by
-	# configure's append, but that's the upstream default for float mixing).
-	if use pipewire; then
-		replace-flags '-O*' '-O3'
-		append-flags '-ffast-math'
-	fi
-
 	use flac && audios+=",flac"
 	use speex && audios+=",speex"
 	use vorbis && audios+=",vorbis"
@@ -150,6 +140,11 @@ src_configure() {
 		$(use_enable alsa alsaseq)
 		$(use pipewire || use_with alsa default-output alsa)
 		$(use_enable pipewire pipewiresyn)
+		# Float mixing (on by default with PipeWire) benefits from -ffast-math.
+		# configure.ac deliberately no longer forces it, nor -O3, so that CFLAGS
+		# stays the builder's; opt in here and leave the optimization level to
+		# make.conf / package.env.
+		$(use_enable pipewire fast-math)
 		$(use pipewire && use_with pipewire default-output pipewire)
 		$(usex arm64 '--enable-simd-mixing' '')
 		$(usex cpu_flags_arm_neon '--enable-simd-mixing' '')
