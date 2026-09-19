@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>bass_dr@hotmail.com</email>
+		<name>David Racine</name>
+	</maintainer>
+	<longdescription lang="en">
+		Kilo Code CLI is an open source AI coding agent that runs in the
+		terminal. It is built on opencode and supports many model providers.
+		This package installs the prebuilt binary release published upstream.
+	</longdescription>
+	<upstream>
+		<remote-id type="github">Kilo-Org/kilocode</remote-id>
+	</upstream>
+</pkgmetadata>
