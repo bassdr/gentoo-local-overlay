@@ -4,7 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-This is a **Gentoo Linux package overlay** (ebuild repository) named `bassdr`. It provides additional packages not in the main Gentoo tree, based on the official Gentoo repository (`masters = gentoo` in `metadata/layout.conf`).
+This is a **personal Gentoo package overlay** (ebuild repository) named `bassdr`. It provides additional packages not in the main Gentoo tree, based on the official Gentoo repository (`masters = gentoo` in `metadata/layout.conf`).
+
+- Official Gentoo tree: `/var/db/repos/gentoo`
+- This overlay: `/var/db/repos/bassdr`
 
 Users add it via:
 ```bash
@@ -12,50 +15,83 @@ eselect repository add bassdr git https://github.com/bassdr/gentoo-local-overlay
 emerge --sync bassdr
 ```
 
-## Ebuild Validation and Quality Checks
+## Skills
+
+Two project skills encode the detailed workflows — prefer them over improvising:
+
+- **`bump-package`** — check upstream for new versions, decide bump vs. delete (gentoo tree may have caught up), rename the ebuild (`git mv`), regenerate the Manifest.
+- **`validate-ebuild`** — pkgcheck, Manifest regen rules, phase testing, formatting rules, pre-commit checklist.
+
+## Core Rules (memorize these)
+
+1. **This overlay only carries what gentoo doesn't.** Before adding or bumping a package, check `/var/db/repos/gentoo`. If gentoo has an equal/newer version and we add no custom patches or USE flags → delete ours instead.
+2. **`git mv`, never `cp` + `rm`**, when renaming an ebuild for a version bump (plain `mv` for untracked files). Keeps history.
+3. **Regenerate the Manifest after ANY change** to an ebuild or anything in its package dir (patches, initd, confd…). This overlay uses **thick Manifests** (no `thin-manifests` in layout.conf), so the Manifest checksums the ebuild, `metadata.xml`, and `files/` too:
+   ```bash
+   ebuild <category>/<pkg>/<pkg>-<ver>.ebuild manifest   # from overlay root
+   ```
+4. **Don't bump `-rN` reflexively** — personal overlay, edit in place when our version already diverges from the tree. New revisions only for changes an installed user needs (runtime fixes, changed installed files).
+5. **Validate before declaring done**: `pkgcheck scan <cat>/<pkg>` must be silent; test phases with `ebuild <...> clean install` and inspect the image.
 
 ```bash
-# Check ebuilds for QA issues (run from repo root or package dir)
-pkgcheck scan
+# Check ebuilds for QA issues (exit status nonzero when findings exist)
+pkgcheck scan <cat>/<pkg>
+pkgcheck scan --cache=-git        # whole overlay; add --cache=-git if git-log errors
 
-# Regenerate Manifest (checksums) after modifying an ebuild or adding source files
+# Regenerate Manifest (checksums)
 ebuild <path/to/package.ebuild> manifest
 
-# Verify a package builds correctly (in a test environment)
+# Verify a package builds correctly
 emerge -av =category/package-version
 ```
 
 ## Ebuild Structure
 
-Each package lives at `category/package-name/package-name-version.ebuild` and follows Gentoo EAPI conventions (currently EAPI 8). Key components:
+Each package lives at `category/package-name/package-name-version.ebuild`:
 
 - **`files/`** subdirectory: patches and auxiliary files referenced in ebuilds
-- **`metadata.xml`**: maintainer info, USE flag descriptions, upstream links
-- **`Manifest`**: BLAKE2B/SHA512 checksums — regenerate with `ebuild foo.ebuild manifest` after any change
+- **`metadata.xml`**: maintainer info, USE flag descriptions, upstream links (`<remote-id>` is the hook for version checks — add it when pkgcheck's `MissingRemoteId` tells you)
+- **`Manifest`**: BLAKE2B/SHA512 checksums — regenerate with `ebuild foo.ebuild manifest`, never edit by hand
+- **`metadata/md5-cache/`**: Portage's generated cache — **gitignored, never commit it**. It embeds gentoo eclass checksums, so a committed copy goes stale whenever the gentoo tree updates an eclass. Portage builds its own cache in `/var/cache/edb/dep` when the repo has none; no `FEATURES=metadata-transfer` needed.
+
+## Ebuild Conventions
+
+- **Copyright header** (update the year when you touch a file):
+  ```
+  # Copyright 1999-<current year> Gentoo Authors
+  # Distributed under the terms of the GNU General Public License v2
+  ```
+- **Variable order** (skel.ebuild; pkgcheck enforces): `DESCRIPTION`, `HOMEPAGE`, `SRC_URI`, `S`, `LICENSE`, `SLOT`, `KEYWORDS`, `IUSE`, `RESTRICT`. Helper variables (e.g. `BASE_URI`, `MY_P`) go just before what they feed.
+- **Formatting**: tab indentation (1 tab = 1 level = 4 columns), ≤ 80 columns, no trailing whitespace, UTF-8.
+- **`EAPI=8`** unless a newer feature is needed (gentoo's skel.ebuild uses EAPI 9; don't mass-migrate).
+- **`KEYWORDS`**: carry keywords over on a bump; a fresh version is `~arch`, never stable-untested. Binary-only builds use `-* ~amd64` style. Personal overlay: keyword only what you actually run.
+- Binary/pre-built packages: `src_unpack`/`src_install` only, no build phase; `RESTRICT="mirror strip"` as appropriate; `QA_PREBUILT` for the image paths.
+- CMake packages: inherit `cmake`, use `cmake_src_configure` / `cmake_src_compile` / `cmake_src_test`.
+- `RESTRICT="test"` when tests can't run in the Portage sandbox.
+- Account ebuilds (`acct-user/`, `acct-group/`) inherit the matching eclass.
+- `metadata.xml` needs a maintainer entry, or install fails; `pkgcheck` reports missing `remote-id`s with the exact line to add.
 
 ## Package Categories in This Overlay
 
-- `acct-group/`, `acct-user/` — system account definitions for services (nqptp, shairport-sync)
-- `dev-libs/` — C++ libraries (POCO, mongo-cxx-driver, wt web toolkit, libclangformat-ide)
-- `dev-util/` — IDEs: CLion, PyCharm, MonoDevelop
-- `media-sound/` — shairport-sync (AirPlay), GuitarPro6
-- `net-misc/` — FreeRDP (remote desktop), nqptp, omada-sdn-controller
-- `sys-apps/` — emerge-update helper script
-- `sys-kernel/` — Raspberry Pi kernel sources
+- `acct-group/`, `acct-user/` — system accounts (nqptp, pipewire, shairport-sync, timidity)
+- `app-emulation/` — anbox, playonlinux
+- `dev-dotnet/`, `dev-java/` — nuget, jargs, yuicompressor
+- `dev-libs/` — libclangformat-ide, mongo-cxx-driver, properties-cpp, wt
+- `dev-python/` — openconnect-sso
+- `dev-util/` — kilo-cli-bin, monodevelop, pycharm
+- `media-libs/`, `media-plugins/` — alac, anttweakbar, vdr-vnsiserver
+- `media-sound/` — GuitarPro6, musescore-soundfont, pipewire-module-spdif-encode, shairport-sync, timidity++
+- `media-video/` — karaokemugen-app, pipewire, wireplumber
+- `net-misc/` — nqptp, omada-sdn-controller
+- `net-print/` — epson-inkjet-printer
+- `sys-apps/` — emerge-update
+
+Several exist only because gentoo lags or diverges (pipewire/wireplumber with OpenRC system-service USE flags, timidity++ live ebuild, kilo-cli-bin not in tree).
 
 ## Custom Eclasses
 
 Located in `eclass/`:
 - `libretro.eclass` / `libretro-core.eclass` — framework for building Libretro emulator cores
-
-## Ebuild Conventions
-
-- Always specify `EAPI=8` (current standard)
-- Binary/pre-built packages: use `src_unpack` or `src_install` only, no build phase; restrict fetch if needed
-- For CMake-based packages, inherit `cmake` eclass and use `cmake_src_configure`, `cmake_src_compile`, `cmake_src_test`
-- `RESTRICT="mirror"` for packages fetched from upstream directly
-- `RESTRICT="test"` when tests cannot run in the Portage sandbox
-- Account ebuilds (`acct-user/`, `acct-group/`) inherit `acct-user` or `acct-group` eclass
 
 ## OpenRC System Services
 
@@ -111,10 +147,17 @@ fi
 - **wireplumber** (`media-video/wireplumber`): `wireplumber-system`
 - **timidity++** (`media-sound/timidity++`): system-service MIDI sequencer
 
+## References
+
+- devmanual.gentoo.org — primary reference for ebuild conventions, init scripts, helpers
+- `.claude/resources/` — OpenRC user services, portage debugging, overlay workflow notes
+
 ## Updating or Adding Packages
 
-1. Copy an existing ebuild as a template from the same category
-2. Update `SRC_URI`, `KEYWORDS`, version variables, and checksums
-3. Run `ebuild <new.ebuild> manifest` to generate the Manifest entry
-4. Test with `emerge -av =category/package-version` on a Gentoo system
+Follow the **`bump-package`** skill (upstream check → gentoo-tree check → `git mv` → edit → manifest → validate). In short:
+
+1. Check gentoo tree first — delete instead of bump if it caught up
+2. Rename with `git mv`, update `SRC_URI`/version vars/`KEYWORDS`
+3. `ebuild <new.ebuild> manifest`
+4. `pkgcheck scan` + `ebuild ... clean install`, then `emerge -av =category/package-version`
 5. Update `metadata.xml` if USE flags or upstream info changed
