@@ -4,6 +4,13 @@
 # "kilo remote" relays a local kilo session to the Kilo Cloud Agents
 # web/mobile interface over an outbound websocket — see `kilo help remote`.
 #
+# The Cloud Agents app's own model picker can default a new session to
+# Kilo's own hosted model (billed against your Kilo Cloud account) even
+# when ~/.config/kilo/kilo.jsonc sets a different default model — it
+# doesn't seem to inherit that local default. If the app complains about
+# credits, check which account it's actually billing: pick your provider
+# explicitly in the app's model picker instead of leaving it on default.
+#
 # To run more than one session (different users, or different workspaces
 # for the same user), symlink the init script under a new name and give
 # it its own conf.d file:

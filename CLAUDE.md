@@ -146,6 +146,11 @@ fi
 - **pipewire** (`media-video/pipewire`): `pipewire-system`, `pipewire-pulse-system` (if `sound-server`)
 - **wireplumber** (`media-video/wireplumber`): `wireplumber-system`
 - **timidity++** (`media-sound/timidity++`): system-service MIDI sequencer
+- **kilo-remote** (`dev-util/kilo-cli-bin`): keeps a `kilo remote` session alive at boot so the Kilo
+  Cloud Agents app can reach it without an active login/SSH session. Always installed (no USE flag —
+  it adds no dependencies); opt-in via `rc-update add kilo-remote default`. Templated on `$RC_SVCNAME`
+  — symlink the init script (`ln -s kilo-remote kilo-remote.foo`) to run more sessions (other users,
+  other workspaces), each with its own conf.d, pidfile, and log dir.
 
 ## References
 
