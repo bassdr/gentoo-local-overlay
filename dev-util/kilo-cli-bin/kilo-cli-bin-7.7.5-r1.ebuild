@@ -59,6 +59,10 @@ src_install() {
 	# Pre-generated (executing the fetched binary at build time trips the
 	# portage sandbox). Regenerate with: kilo completion bash
 	newbashcomp "${FILESDIR}/kilo-completion.bash" kilo
+
+	# OpenRC service to keep 'kilo remote' running at boot
+	newinitd "${FILESDIR}/kilo-remote.initd" kilo-remote
+	newconfd "${FILESDIR}/kilo-remote.confd" kilo-remote
 }
 
 pkg_postinst() {
@@ -70,4 +74,12 @@ pkg_postinst() {
 	elog "    emerge --sync bassdr && emerge -u dev-util/kilo-cli-bin"
 	elog
 	elog "The sandboxed bash tool needs user namespaces (CONFIG_USER_NS) in the kernel."
+	elog
+	elog "To keep 'kilo remote' running at boot (reachable from the Kilo Cloud"
+	elog "Agents web/mobile interface without an active login/SSH session), run"
+	elog "'kilo auth login' as the desired user, set KILO_USER in"
+	elog "/etc/conf.d/kilo-remote, then:"
+	elog "    rc-update add kilo-remote default"
+	elog "For more than one session (other users, or other workspaces), see the"
+	elog "symlink instructions at the top of /etc/conf.d/kilo-remote."
 }

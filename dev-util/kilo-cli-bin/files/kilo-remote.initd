@@ -1,0 +1,44 @@
+#!/sbin/openrc-run
+# Copyright 1999-2026 Gentoo Authors
+# Distributed under the terms of the GNU General Public License v2
+#
+# Keeps a "kilo remote" session running at boot, so the Kilo Cloud Agents
+# web/mobile interface can always reach this machine without an active
+# login or SSH session first. "kilo remote" only opens an outbound
+# websocket to Kilo's relay (wss://ingest.kilosessions.ai) — no inbound
+# port needs to be forwarded or firewalled.
+#
+# Requires KILO_USER to already be authenticated ('kilo auth login' run
+# interactively as that user beforehand) — this service cannot log in.
+#
+# Templated: symlink this script to run more than one session (different
+# users, or different workspaces for the same user), each with its own
+# /etc/conf.d/<name>. See /etc/conf.d/kilo-remote for how.
+#
+# Configuration: /etc/conf.d/${RC_SVCNAME}
+
+: "${KILO_LOG_DIR:=/var/log/kilo/${RC_SVCNAME}}"
+
+supervisor=supervise-daemon
+command=/usr/bin/kilo
+command_args="remote"
+command_user="${KILO_USER}"
+directory="${KILO_WORKDIR:-$(getent passwd "${KILO_USER}" 2>/dev/null | cut -d: -f6)}"
+pidfile="/run/${RC_SVCNAME}.pid"
+output_log="${KILO_LOG_DIR}/${RC_SVCNAME}.log"
+error_log="${KILO_LOG_DIR}/${RC_SVCNAME}.log"
+
+depend() {
+	need net
+}
+
+start_pre() {
+	if [ -z "${KILO_USER}" ]; then
+		eerror "KILO_USER is not set — configure it in /etc/conf.d/${RC_SVCNAME}"
+		return 1
+	fi
+	# checkpath doesn't create parents recursively, and KILO_LOG_DIR
+	# defaults to a subdirectory of /var/log/kilo (shared across instances).
+	checkpath -d -m 0755 /var/log/kilo
+	checkpath -d -o "${KILO_USER}" -m 0750 "${KILO_LOG_DIR}"
+}

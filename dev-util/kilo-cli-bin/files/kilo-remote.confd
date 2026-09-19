@@ -1,0 +1,27 @@
+# /etc/conf.d/kilo-remote
+# Configuration for the kilo-remote OpenRC service (dev-util/kilo-cli-bin).
+#
+# "kilo remote" relays a local kilo session to the Kilo Cloud Agents
+# web/mobile interface over an outbound websocket — see `kilo help remote`.
+#
+# To run more than one session (different users, or different workspaces
+# for the same user), symlink the init script under a new name and give
+# it its own conf.d file:
+#   cd /etc/init.d && ln -s kilo-remote kilo-remote.myproject
+#   cp /etc/conf.d/kilo-remote /etc/conf.d/kilo-remote.myproject
+#   $EDITOR /etc/conf.d/kilo-remote.myproject   # set KILO_USER/KILO_WORKDIR
+#   rc-update add kilo-remote.myproject default
+# Each instance gets its own pidfile and log dir, keyed off the service name.
+
+# Existing local user to run "kilo remote" as. Its ~/.config/kilo and
+# ~/.local/share/kilo/auth.json (from an already-run `kilo auth login`)
+# are what get used — this service does not log in for you.
+KILO_USER=""
+
+# Workspace directory kilo starts in. Defaults to KILO_USER's home.
+#KILO_WORKDIR="/home/david/projects/myproject"
+
+# Where this instance's stdout/stderr are logged.
+# Defaults to /var/log/kilo/<service name>, so multiple instances (which
+# may run as different users) don't fight over one shared directory.
+#KILO_LOG_DIR="/var/log/kilo/kilo-remote"
