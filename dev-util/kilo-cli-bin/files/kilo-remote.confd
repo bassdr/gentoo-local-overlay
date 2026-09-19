@@ -25,3 +25,11 @@ KILO_USER=""
 # Defaults to /var/log/kilo/<service name>, so multiple instances (which
 # may run as different users) don't fight over one shared directory.
 #KILO_LOG_DIR="/var/log/kilo/kilo-remote"
+
+# Provider API keys (see `kilo models`/~/.config/kilo/kilo.jsonc for which
+# env vars your provider needs). This service does NOT source KILO_USER's
+# ~/.bashrc/~/.profile — a daemon never does — so a key that only lives
+# there won't be visible here even though it works fine in an interactive
+# shell. Export it below instead, and keep this file root-only:
+#   chmod 0600 /etc/conf.d/kilo-remote (and any symlinked instance's conf.d)
+#export OPENROUTER_API_KEY="sk-or-v1-..."

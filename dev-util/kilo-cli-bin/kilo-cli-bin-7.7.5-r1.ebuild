@@ -60,9 +60,12 @@ src_install() {
 	# portage sandbox). Regenerate with: kilo completion bash
 	newbashcomp "${FILESDIR}/kilo-completion.bash" kilo
 
-	# OpenRC service to keep 'kilo remote' running at boot
+	# OpenRC service to keep 'kilo remote' running at boot. root-only: it's
+	# where provider API keys end up, since the daemon can't see KILO_USER's
+	# ~/.bashrc (see the file's own comments).
 	newinitd "${FILESDIR}/kilo-remote.initd" kilo-remote
 	newconfd "${FILESDIR}/kilo-remote.confd" kilo-remote
+	fperms 0600 /etc/conf.d/kilo-remote
 }
 
 pkg_postinst() {
