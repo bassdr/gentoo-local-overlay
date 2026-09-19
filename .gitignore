@@ -1,0 +1,6 @@
+# Portage metadata cache: generated locally by egencache / pmaint regen.
+# Not committed — entries embed gentoo eclass checksums, so a committed copy
+# goes stale whenever the gentoo tree updates an eclass, with no commit here.
+# Portage computes and caches metadata in /var/cache/edb/dep when it is absent
+# (no FEATURES=metadata-transfer required).
+metadata/md5-cache/
