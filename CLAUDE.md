@@ -74,10 +74,9 @@ Each package lives at `category/package-name/package-name-version.ebuild`:
 ## Package Categories in This Overlay
 
 - `acct-group/`, `acct-user/` — system accounts (nqptp, pipewire, shairport-sync, timidity)
-- `app-emulation/` — anbox, playonlinux
+- `app-emulation/` — anbox, dxvk-nvapi, playonlinux
 - `dev-dotnet/`, `dev-java/` — nuget, jargs, yuicompressor
 - `dev-libs/` — libclangformat-ide, mongo-cxx-driver, properties-cpp, wt
-- `dev-python/` — openconnect-sso
 - `dev-util/` — kilo-cli-bin, monodevelop, pycharm
 - `media-libs/`, `media-plugins/` — alac, anttweakbar, vdr-vnsiserver
 - `media-sound/` — GuitarPro6, musescore-soundfont, pipewire-module-spdif-encode, shairport-sync, timidity++
