@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "https://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<maintainer type="person">
+		<email>bass_dr@hotmail.com</email>
+		<name>David Racine</name>
+	</maintainer>
+	<longdescription lang="en">
+		NVAPI implementation for Wine on top of DXVK and vkd3d-proton, as used
+		by Proton: lets games detect an NVIDIA GPU and use DLSS, Reflex and
+		similar features. setup_dxvk_nvapi.sh (from this overlay) enables it
+		in a prefix.
+	</longdescription>
+	<use>
+		<flag name="crossdev-mingw">
+			Use <pkg>sys-devel/crossdev</pkg> for the toolchain rather than
+			<pkg>dev-util/mingw64-toolchain</pkg> (requires manual setting up
+			and is mostly unsupported, try disabling if have issues)
+		</flag>
+	</use>
+	<upstream>
+		<remote-id type="github">jp7677/dxvk-nvapi</remote-id>
+	</upstream>
+</pkgmetadata>
